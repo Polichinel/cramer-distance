@@ -16,7 +16,7 @@ sufficient on its own for demonstration purposes.
    in log-space). This requires no per-observation metadata.
 
 3. **Model-derived.** Use the confidence output of a trained weight
-   head (Note B) to scale the observational uncertainty per cell-month.
+   trained weight head to scale the observational uncertainty per cell-month.
    Cells the model identifies as low-confidence get wider F_obs, on
    the rationale that the model's distrust of the observation is
    itself evidence that the observation is noisy.

@@ -6,6 +6,7 @@ dist/
 build/
 .pytest_cache/
 uv.lock
+paper/main.pdf
 paper/*.aux
 paper/*.log
 paper/*.out

@@ -24,8 +24,8 @@ Three constructors are provided for F_obs:
 
 1. From external data quality bounds (e.g., UCDP low/high estimates)
 2. Parametric — LogNormal centered on y with fixed relative sigma
-3. Model-derived — from a trained weight head (closing the loop with the
-   shared-backbone weight head in Note B)
+3. Model-derived — from a trained weight head (see
+   `cramer_distance.observation_uncertainty.f_obs_from_weight_head`)
 
 Consistency under stochastic observations is verified numerically via
 verify_propriety_in_expectation. An analytical proof via the energy-distance

@@ -20,7 +20,7 @@ This module implements fuzzy CRPS via numerical integration over a grid
 of evaluation points spanning the support of both F_pred and F_obs. It is
 not the most efficient implementation possible — a closed-form expression
 exists for some specific F_obs families — but it is the most general and
-suffices for the demonstration in Note C.
+suffices for the paper's demonstration.
 
 For propriety arguments and constructors of F_obs, see
 `cramer_distance.propriety` and `cramer_distance.observation_uncertainty`

@@ -19,8 +19,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import pytest
-
 REFS_BIB = Path(__file__).resolve().parents[1] / "paper/refs.bib"
 INTRO_TEX = Path(__file__).resolve().parents[1] / "paper/sections/01_introduction.tex"
 METHOD_TEX = Path(__file__).resolve().parents[1] / "paper/sections/04_fuzzy_crps.tex"

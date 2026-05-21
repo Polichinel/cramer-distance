@@ -3,6 +3,10 @@ name = "cramer-distance"
 version = "0.1.0"
 description = "Forecast evaluation with observational uncertainty: a Cramér-distance perspective."
 readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Simon Polichinel von der Maase", email = "simmaa@prio.org" },
+]
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
