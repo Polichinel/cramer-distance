@@ -1,0 +1,27 @@
+Armed-conflict fatality counts are derived from media reports, witness accounts, and analyst judgement; the reported value is a noisy estimate of an underlying truth that no single source observes exactly. UCDP---the standard source for conflict forecasting---explicitly provides low/best/high uncertainty bounds per event \citep{ucdp_codebook}, and estimated underreporting exceeds 100\% for low-fatality events \citep{vesco2026uncertainty}. As the field moves toward full predictive distributions---the 2023/24 VIEWS prediction challenge required submissions as distributional forecasts rather than point estimates \citep{hegre2025prediction}---the question of how to evaluate these distributions against uncertain observations becomes critical.
+
+The dominant evaluation metric is the Continuous Ranked Probability Score \citep[CRPS;][]{matheson1976scoring,hersbach2000decomposition}. It measures how well a forecast distribution matches an observation: the closer the forecast's cumulative distribution function (CDF) $F_\text{pred}$ is to the observation, the lower the score:
+%
+\begin{equation}
+    \text{CRPS}(F_\text{pred}, y) = \int_{-\infty}^{\infty} \bigl( F_\text{pred}(z) - \mathbf{1}\{y \le z\} \bigr)^2 \, dz.
+\end{equation}
+%
+CRPS is strictly proper \citep{gneiting2007strictly}---a forecaster who reports the distribution she actually believes always scores at least as well as one who misreports, so the metric cannot be gamed. This property has made CRPS central to forecast verification in meteorology \citep{candille2005evaluation,jordan2019evaluating}, hydrology \citep{laio2007verification}, economics \citep{gneiting2011comparing}, and conflict forecasting \citep{hegre2019views}.
+
+The step indicator $\mathbf{1}\{y \le z\}$ encodes an implicit assumption: that the observation $y$ is the true value, known without error. When this assumption is violated, CRPS rewards forecast distributions that concentrate probability mass near the reported value---even when a wider distribution would better represent what is actually known about the underlying truth. Two versions of the same forecast can receive opposite rankings depending on whether they calibrate to the reported point (rewarded by CRPS) or to the plausible range of underlying values (penalised by CRPS). This is not a flaw in the propriety theorem---the theorem concerns draws from the true distribution---but a practical consequence of using a noisy proxy for the truth as if it were exact.
+
+The problem of scoring forecasts against uncertain observations has been addressed from several principled angles, primarily in meteorology where rain gauges and satellite retrievals carry known measurement error: conditional-expectation corrections \citep{brocker2007scoring}, Bayesian error models \citep{ferro2017observation}, distributional CRPS analysis \citep{bessac2021forecast,bolin2023local}, and information-theoretic frameworks \citep{weijs2011accounting}. Separately, \citet{thorarinsdottir2013using} define the Integrated Quadratic Distance (IQD)---the $L^2$ distance between two CDFs, i.e.\ the Cram\'er distance \citep{cramer1946}---as a proper divergence for comparing non-degenerate distributions; classical CRPS is the special case where one CDF degenerates to a step function. I compare these approaches to the present reformulation in \S6.
+
+I am not proposing a new metric---the Cram\'er distance has been established since at least the mid-twentieth century \citep{cramer1946} and its use as a verification divergence is known \citep{thorarinsdottir2013using,szekely2013energy}. What I contribute is an operational examination of this distance \emph{from the perspective of conflict forecasting}, where observational uncertainty is the norm rather than the exception, and where the practical question---when does acknowledging that uncertainty change which model we would select?---has not been investigated.
+
+My contribution is threefold, all operational rather than theoretical:
+%
+\begin{enumerate}
+    \item Three \emph{constructors}---operational recipes for building $F_\text{obs}$ from available data---tailored to the data sources common in conflict and social-science forecasting: from explicit dataset quality bounds, from the empirically estimated Reported-Value Inflated (RVI) Gumbel mixture of \citet{vesco2026uncertainty}, and from a parametric default (\S3).
+
+    \item A characterisation of the parameter regime in which replacing the step indicator with a smooth $F_\text{obs}$ produces a different ranking of forecast versions from classical CRPS, and the regime in which it does not---demonstrated on controlled examples, UCDP conflict data, and operational HydraNet predictions \citep{VonDerMaase2025hydranet} (\S5).
+
+    \item Numerical verification of consistency under stochastic observations, with an empirical characterisation of the conditions under which mis-specification of $F_\text{obs}$ introduces bias (\S4, \S6).
+\end{enumerate}
+%
+The reformulation reduces to classical CRPS when observational uncertainty is zero, so it generalises rather than replaces the standard metric.

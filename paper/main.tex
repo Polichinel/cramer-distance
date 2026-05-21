@@ -1,0 +1,55 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble}
+
+% Override shared triptych metadata for single-author arXiv submission
+\author{Simon Polichinel von der Maase}
+\lhead{von der Maase}
+\title{Forecast Evaluation with Observational Uncertainty:\\ A Cram\'er-Distance Perspective}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent Armed-conflict fatality counts are uncertain. UCDP data---the standard source for conflict forecasting---systematically underreport deaths, with estimated underreporting exceeding 100\% for low-fatality events---meaning the true count may be more than twice the recorded figure \citep{vesco2026uncertainty}. As the field moves from point-estimate predictions toward full predictive distributions \citep{hegre2025prediction}, the question of how to evaluate these distributions becomes critical. The dominant evaluation metric---the Continuous Ranked Probability Score (CRPS)---assumes the observed fatality count is exact. This creates a bias in model selection: CRPS rewards forecasts that concentrate on the reported number over forecasts that honestly represent the uncertainty around it. I show that replacing this assumption with a distribution reflecting what is actually known about the true value yields a well-established metric---the Cram\'er distance, which is simply the standard CRPS generalised from a single observed value to an uncertain observation---that reduces to standard CRPS when observations are precise. I provide three practical recipes for building the observation distribution from sources available to conflict researchers: from UCDP quality bounds, from the empirically grounded uncertainty model of \citet{vesco2026uncertainty}, and from a calibrated parametric default. On 19{,}397 UCDP cell-months, the reformulation reverses the model ranking in 39\% of cases; on operational predictions from HydraNet \citep{VonDerMaase2025hydranet}, a spatio-temporal deep-learning model for conflict forecasting, 99.4\% of cases where the standard metric favours overconfidence are reversed. The metric's reliability depends on the quality of the observation distribution; I characterise the conditions under which mis-specification introduces bias and verify consistency numerically across three distributional families.
+\end{abstract}
+
+\paragraph{Significance.}
+Forecast competitions and model selection procedures that use CRPS as their ranking metric---such as the 2023/24 VIEWS prediction challenge \citep{hegre2025prediction}---implicitly assume observations are exact. When this assumption is violated, competition rankings can systematically favour overconfident models. I show that accounting for observational uncertainty in forecast evaluation changes which forecast version is judged best, and demonstrate this on both synthetic and operational conflict forecasts (\S5). The argument applies to any domain where observations carry non-trivial uncertainty \citep{bessac2021forecast}.
+
+\section{Introduction}
+\input{sections/01_introduction}
+
+\section{Classical CRPS and Its Implicit Assumption}
+\input{sections/03_classical_crps}
+
+\section{The Cram\'er-Distance Reformulation}
+\input{sections/04_fuzzy_crps}
+
+\section{Consistency Properties}
+\input{sections/05_propriety}
+
+\section{Demonstration}
+\input{sections/06_demonstration}
+
+\section{Discussion}
+\input{sections/07_discussion}
+
+\appendix
+
+\section{Consistency Properties: Formal Details}
+\label{sec:appendix_consistency}
+\input{sections/appendix_a_consistency}
+
+\section{Supplementary Demonstration Results}
+\label{sec:appendix_demo}
+\input{sections/appendix_b_demonstration}
+
+\paragraph{Acknowledgments.}
+This work was funded by the Research Council of Norway through the Uncertainty of Forecasting Fatalities in Armed Conflict (UFFAC) project at the Peace Research Institute Oslo (PRIO).
+
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+\end{document}

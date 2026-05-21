@@ -1,0 +1,63 @@
+% ============================================================
+% Shared FSFC--PRIO--VIEWS preamble for the views-lab00
+% research notes triptych. Adapted from the FAO pre-release note
+% 05 preamble (papers/_assets/style adapted from
+% fao_02_pre_release_note_05/main.tex).
+%
+% Each note's main.tex should include this file with:
+%   \input{../_assets/preamble}
+% ============================================================
+
+% LANGUAGE & ENCODING
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+
+% TYPOGRAPHY & SPACING
+\usepackage{microtype}
+\usepackage[onehalfspacing]{setspace}
+\usepackage{parskip}
+\setlength{\footnotesep}{0.7\baselineskip}
+\usepackage[hang,flushmargin]{footmisc}
+
+% PAGE LAYOUT
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Maase et al.}
+\rhead{\today}
+\lfoot{PRIO --- VIEWS}
+\rfoot{\thepage}
+\renewcommand{\footrulewidth}{0.8pt}
+
+% GRAPHICS & TABLES
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage[section]{placeins}
+\usepackage[table]{xcolor}
+
+% MATH & SYMBOLS
+\usepackage{amsmath,amssymb}
+
+% CITATION & QUOTING
+\usepackage{csquotes}
+\usepackage{natbib}
+
+% HYPERLINKS
+\usepackage[hidelinks]{hyperref}
+
+% NOTES
+\usepackage[colorinlistoftodos]{todonotes}
+
+% TITLE
+\usepackage{titling}
+\pretitle{\vspace{2em}\centering\Huge\bfseries}
+\posttitle{\par\vspace{1em}}
+\preauthor{\centering\large}
+\postauthor{\par\vspace{0.5em}}
+\predate{\centering\small}
+\postdate{\par\vspace{2em}}
+
+\author{von der Maase, Dornin Pinheiro \& Häffner}
+\date{\today}

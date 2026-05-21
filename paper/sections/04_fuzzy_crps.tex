@@ -1,0 +1,47 @@
+\paragraph{Reformulation.}
+The fix is straightforward: instead of comparing the forecast against a hard step at the reported value, I compare it against a smooth distribution that represents what is actually known about the observation. Concretely, I replace the step indicator in the CRPS integrand with a smooth observational CDF $F_\text{obs}(z)$:
+%
+\begin{equation}
+    \text{CRPS}_\text{obs}(F_\text{pred}, F_\text{obs}) = \int_{-\infty}^{\infty} \bigl( F_\text{pred}(z) - F_\text{obs}(z) \bigr)^2 \, dz.
+    \label{eq:fuzzy_crps}
+\end{equation}
+%
+When $F_\text{obs}$ degenerates to a step function at the reported value $y$, the integral reduces exactly to classical CRPS. When $F_\text{obs}$ has positive variance, the integrand is smaller for forecasts that match $F_\text{obs}$ and larger for forecasts that deviate in either direction.
+
+\paragraph{Identification with the Cram\'er distance.}
+The integral in Eq.~\ref{eq:fuzzy_crps} is a known mathematical object---the Cram\'er distance between $F_\text{pred}$ and $F_\text{obs}$, measuring the total squared area between two probability curves \citep{cramer1946}.\footnote{The Cram\'er distance is closely related to the energy distance of \citet{szekely2013energy}: $\int(F - G)^2\,dz = \tfrac{1}{2}\,\varepsilon(F,G)$ in the univariate case.} In forecast verification, \citet{thorarinsdottir2013using} define the same integral as the \emph{Integrated Quadratic Distance} (IQD) and apply it to evaluate climate model output against reanalysis distributions---both non-degenerate CDFs. Classical CRPS is the special case where $F_\text{obs}$ degenerates to a step function at a single point; Eq.~\ref{eq:fuzzy_crps} is the general form applied to a non-degenerate $F_\text{obs}$.
+
+\paragraph{Constructing $F_\text{obs}$.}
+The proposal is only as useful as the choice of $F_\text{obs}$. I provide three constructors---operational recipes for building $F_\text{obs}$ from available data---ordered from most data-rich to most generic.
+
+\subsection*{Constructor 1: Dataset quality bounds}
+Many event datasets provide explicit low/best/high estimates per observation. The UCDP Georeferenced Event Dataset \citep{ucdp_codebook}, for instance, records best, low, and high fatality estimates derived from the coding process---these bounds represent coder disagreement about the plausible range, not quantiles of a measurement-error distribution. I treat them pragmatically as the support of either a uniform or a log-normal distribution centred on the best estimate:
+%
+\begin{equation}
+    F_\text{obs}(z) = \text{Uniform}(z; \text{low}, \text{high})
+    \quad \text{or} \quad
+    F_\text{obs}(z) = \text{LogNormal}(z; \log(\text{best}), \sigma_\text{LN})
+\end{equation}
+%
+where $\sigma_\text{LN}$ is set so that approximately 95\% of mass falls in $[\text{low}, \text{high}]$. This is the most principled constructor because it uses the dataset's own quality metadata, external to the forecaster being evaluated.
+
+\subsection*{Constructor 2: RVI Gumbel mixture}
+\citet{vesco2026uncertainty} asked conflict-data coders to estimate plausible ranges for a set of reported fatality counts. The responses revealed a consistent pattern: some fraction of coders effectively reproduced the reported value, while the remainder believed the true count was likely higher. Vesco et al.\ capture this in a Reported-Value Inflated (RVI) Gumbel mixture model, where the Gumbel component is a right-skewed distribution that places more probability mass above the reported value than below---matching the asymmetric direction of conflict-fatality underreporting. The RVI CDF is
+%
+\begin{equation}
+    F_\text{obs}(z) = w \cdot \mathbf{1}(z \geq \tilde{y}) + (1 - w) \cdot \text{Gumbel}(z; \mu_\text{g}, \beta_\text{g}),
+\end{equation}
+%
+where $w$ is the probability mass on the reported value $\tilde{y}$, and $(\mu_\text{g}, \beta_\text{g})$ are the Gumbel location and scale. The location and scale parameters $(\mu_\text{g}, \beta_\text{g})$ are predicted from $\log(1 + \tilde{y})$ and vague-number indicator dummies via linear regression; $w$ is predicted from the same covariates via logistic regression. I use the coefficient estimates from Table~A10 in \citet{vesco2026uncertainty}, which pools across violence types (36 coefficients total: intercept + slope for each of $w$, $\mu_\text{g}$, $\beta_\text{g}$, plus vague-number terms).\footnote{The implementation clamps $w \in [0.01, 0.99]$ and $\mu_g \geq 0$ to prevent degenerate predictions; the Gumbel CDF assigns non-zero probability to negative fatalities, which is handled by truncating at zero.} This constructor captures the asymmetric underreporting that symmetric parametric constructors miss: for low-fatality events, where underreporting is most severe, the Gumbel tail spreads substantially above the reported count. The vague-number indicator dummies are designed for event-level reported values; applying them to cell-month aggregates is a known approximation (see \S5 for discussion). Where UCDP data are available, this constructor supersedes the parametric default.
+
+\subsection*{Constructor 3: Parametric default}
+For datasets without explicit bounds or an empirical uncertainty model, a default is a log-normal centred on the reported value with a fixed relative uncertainty:
+%
+\begin{equation}
+    F_\text{obs}(z) = \text{LogNormal}\bigl(z; \log(y), \sigma_\text{rel}\bigr).
+\end{equation}
+%
+The parameter $\sigma_\text{rel}$ should be informed by domain knowledge---the typical revision rate between successive dataset releases, the known underreporting ratio, or expert elicitation. For armed-conflict fatality counts, I use $\sigma_\text{rel} = 0.4$ as a working default. In practice, this places roughly two-thirds of the observational distribution between $0.67y$ and $1.49y$---for a reported count of 50 deaths, the plausible range runs from about 34 to 75. The RVI Gumbel model of \citet{vesco2026uncertainty} (Constructor~2) implies that the effective log-space standard deviation of observational uncertainty varies from approximately 0.2 for large events ($\tilde{y} > 100$) to over 0.9 for single-fatality events; $\sigma_\text{rel} = 0.4$ approximates the range typical of small-to-medium events. Where event-specific uncertainty is available, Constructor~2 supersedes this parametric default. A community using this reformulation for benchmarking would need to agree on standard $\sigma_\text{rel}$ values per data type, analogous to standardised baselines in forecast competitions.
+
+\paragraph{Numerical implementation.}
+The integral in Eq.~\ref{eq:fuzzy_crps} is computed by trapezoidal integration over a uniform grid of 4{,}001 points covering the support of both $F_\text{pred}$ and $F_\text{obs}$. Forecast CDFs are represented as empirical CDFs from 4{,}000 Monte Carlo samples (random draws used to approximate the CDF numerically; seed~$= 0$ throughout). Doubling the grid to 8{,}001 points changes scores by $< 0.01\%$; doubling the Monte Carlo sample to 8{,}000 changes individual scores by up to ${\sim}4\%$ but does not affect rankings. For specific parametric families where both CDFs are log-normal, closed-form expressions for the IQD exist; the reference implementation uses the general numerical form to accommodate arbitrary $F_\text{obs}$ constructors.

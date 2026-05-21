@@ -1,0 +1,107 @@
+\subsection{Constructor comparison}
+
+The controlled demonstration in \S5.1 uses Constructor~3 (parametric). Table~\ref{tab:constructor_comparison} repeats the comparison with Constructor~1 (dataset quality bounds), using UCDP-style low/best/high bounds around the same $y=50$. With wide bounds $[25, 50, 100]$---typical of events in regions with limited media coverage---the ranking reversal holds: the honest version wins. With narrow bounds $[45, 50, 55]$---typical of well-documented events---the reversal disappears and the tight version wins, which is correct: when the observation is known precisely, a tight forecast is the right answer.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{llrrl}
+        \toprule
+        $F_\text{obs}$ constructor & Parameters & Tight & Honest & Winner \\
+        \midrule
+        Classical CRPS (step at $y$) & --- & 0.595 & 4.881 & Tight \\
+        Constructor 3 (parametric) & $\sigma_\text{rel} = 0.4$ & 3.486 & 0.003 & Honest \\
+        Constructor 1 (bounds) & $[25, 50, 100]$ & 6.997 & 1.361 & Honest \\
+        Constructor 1 (bounds) & $[45, 50, 55]$ & 0.040 & 3.373 & Tight \\
+        \bottomrule
+    \end{tabular}
+    \caption{Scores for the tight and honest forecast versions under classical CRPS, the parametric Cram\'er-distance reformulation (Constructor~3), and the bounds-based reformulation (Constructor~1). The ranking reversal occurs when observational uncertainty is substantial---either via a wide $\sigma_\text{rel}$ or via wide low/high bounds---and disappears when bounds are narrow. The parametric constructor uses $\sigma_\text{rel} = 0.4$ (the working default defined in \S3).}
+    \label{tab:constructor_comparison}
+\end{table}
+
+\subsection{Robustness and boundary conditions}
+
+\paragraph{Boundaries.}
+The reversal does not hold universally. It disappears when $\sigma_\text{rel} \leq 0.10$ (observational uncertainty is small enough that a tight forecast is genuinely correct), when $\sigma_\text{tight} \geq \sigma_\text{rel}$ (the ``tight'' version is no longer meaningfully tight), or when $\sigma_\text{honest} \geq 1.0$ (the honest version is so wide it no longer overlaps $F_\text{obs}$). The reformulation changes the ranking only when observational uncertainty is large enough to be consequential.
+
+A natural concern is that the reversal depends on the honest version's spread exactly matching $F_\text{obs}$. It does not. Varying $\sigma_\text{honest}$ while holding $\sigma_\text{rel} = 0.4$ fixed, the reversal holds for $\sigma_\text{honest} \in [0.10, \, 0.85]$---the honest version can be 4$\times$ too narrow or 2$\times$ too wide and still beat the tight version. The crossover occurs at $\sigma_\text{honest} \approx 0.88$. This robustness arises because the reversal is driven by the tight version's \emph{failure}: its extremely narrow CDF ($\sigma = 0.05$) is far from the smooth $F_\text{obs}$ at almost every evaluation point, producing a Cram\'er-distance score of approximately 3.49 regardless of what the honest version does. The honest version's score varies from 0.003 (when matching $F_\text{obs}$) to 3.1 (at $\sigma_\text{honest} = 0.85$), staying below 3.49 across the entire range.
+
+\paragraph{Location error tolerance.}
+The controlled experiments centre both versions on the reported value $y$. What happens when the honest version also has location error? I test this by shifting the honest version's location to $y \cdot e^\delta$ in the original space (equivalently, adding $\delta$ in log-space) while keeping the tight version centred at $y$ and holding $\sigma_\text{rel} = 0.4$ fixed. Table~\ref{tab:loc_offset} shows the results.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{rrrrrl}
+        \toprule
+        $\delta$ & Honest centre & Tight & Honest & Winner & Location error \\
+        \midrule
+        0.00 & $50.0$ & 3.486 & 0.003 & Honest & 0\% \\
+        0.10 & $55.3$ & 3.486 & 0.449 & Honest & $+$11\% \\
+        0.20 & $61.1$ & 3.486 & 1.736 & Honest & $+$22\% \\
+        0.28 & $66.2$ & 3.486 & 3.432 & Honest & $+$32\% \\
+        0.29 & $66.8$ & 3.486 & 3.687 & Tight & $+$34\% \\
+        0.40 & $74.6$ & 3.486 & 7.175 & Tight & $+$49\% \\
+        \bottomrule
+    \end{tabular}
+    \caption{Cram\'er-distance scores under location error. The honest version ($\sigma_\text{honest} = 0.4$) is shifted $\delta$ units in log-space from the reported value $y = 50$; the tight version ($\sigma_\text{tight} = 0.05$) remains centred at $y$. The reversal persists until the honest version's location error exceeds roughly 33\% of the reported value, at which point location error dominates spread calibration.}
+    \label{tab:loc_offset}
+\end{table}
+
+The reversal persists for location errors up to $\delta \approx 0.28$ (a 33\% shift in the original space). This tolerance is substantial: an honest version that is one-third off in location but correctly calibrated for spread still beats a tight version that nails the location but ignores observational uncertainty. The crossover at $\delta \approx 0.29$ occurs where the honest version's location error penalty exceeds the tight version's fixed spread penalty ($\approx 3.49$). Beyond this point, the tight version wins under both metrics.
+
+\paragraph{Generalisation across distributional families.}
+The controlled demonstration uses log-normal distributions throughout. To confirm that the propriety and ranking-reversal results are not artifacts of this choice, I repeat the analysis under two additional data-generating processes: (i)~a Gaussian DGP with $y \sim \text{Normal}(50, 15)$, Gaussian $F_\text{obs}$ ($\sigma_\text{obs} = 10$), and Gaussian forecast versions (tight $\sigma = 2$, honest $\sigma = 10$); and (ii)~a count-like regime representative of conflict data ($y \in \{3, 5, 10, 20\}$, $\sigma_\text{rel} = 0.4$), using the same log-normal parameterisation for $F_\text{obs}$ and both versions. Table~\ref{tab:multi_dgp} summarises the results.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{llccc}
+        \toprule
+        DGP & Parameters & Location bias & Reversal range & BN concordance \\
+        \midrule
+        LogNormal & $\mu_{\text{log}} = 1.0$, $\sigma = 0.3$ & 0.000 & $\sigma_\text{h} \in [0.10, 0.85]$ & agree \\
+        Normal & $\mu = 50$, $\sigma = 10$ & 0.000 & $\sigma_\text{h} \in [2.5, 20.0]$ & agree \\
+        Count-like & $y \in \{3, 5, 10, 20\}$ & 0.000 & all $y > 0$ reversed & agree \\
+        \bottomrule
+    \end{tabular}
+    \caption{Propriety and ranking-reversal results across three distributional families. ``Location bias'' is the distance between the $\mu$-sweep argmin and the true location parameter (zero in all cases); note that scale consistency is a separate question---see Appendix~\ref{sec:appendix_consistency}. ``Reversal range'' is the range of honest-version spread values for which the Cram\'er distance reverses the classical CRPS ranking. ``BN concordance'' indicates whether the Bessac--Naveau conditional-expectation correction \citep{bessac2021forecast}---an independent method for the same problem, which computes the expected score over the observation-error distribution---agrees with the Cram\'er distance on which version wins; high concordance validates the Cram\'er-distance result.}
+    \label{tab:multi_dgp}
+\end{table}
+
+In all three cases, the Cram\'er distance has zero location bias at the demonstrated parameters, produces a ranking reversal when the tight version's spread is far below the observational uncertainty, and agrees with the Bessac--Naveau correction on the winner.
+
+\subsection{UCDP comparison details}
+
+\paragraph{Comparison with bounds-based Constructor~1.}
+I also score with Constructor~1 (log-normal $F_\text{obs}$ fitted to the UCDP low/best/high bounds; \S3). Of the 19{,}397 cell-months, 4{,}679 have genuine bounds (low $\neq$ best or high $\neq$ best, with low $> 0$); the remaining 14{,}718 have degenerate bounds (low $=$ best $=$ high), for which Constructor~1 reduces to a step function and the Cram\'er distance reduces to classical CRPS. Among cell-months with genuine bounds, the reversal rate is 9.9\%---substantially lower than Constructor~3 (39.0\%). This reflects the fact that UCDP's low/high bounds are coding ranges rather than statistical confidence intervals \citep{vesco2026uncertainty}: the bounds are narrow relative to the true observational uncertainty, producing an $F_\text{obs}$ close to the degenerate step function. The bounds-based Constructor~1 therefore understates true observational uncertainty, and the 9.9\% reversal rate should be read as a lower bound.
+
+\paragraph{Comparison with the RVI Gumbel mixture.}
+I apply Constructor~2 (the RVI Gumbel mixture defined in \S3) and repeat the comparison. Under the RVI constructor, the ranking reversal is substantially wider than under the parametric Constructor~3: the honest version wins in 80.8\% of cell-months (versus 39.0\% for Constructor~3). This is expected: the RVI model captures asymmetric underreporting---particularly severe for low-fatality events---that the symmetric log-normal parametric constructor cannot represent. The Bessac--Naveau correction confirms the pattern, with 79.6\% reversal under RVI draws.
+
+A structural limitation applies, however: the \citet{vesco2026uncertainty} regression coefficients predict uncertainty for \emph{individual coded events}, whereas the comparison above aggregates events to cell-months by summing best estimates before applying the RVI constructor. This is a unit-of-analysis mismatch---the model's vague-number dummies are designed for event-level reported values, not for sums across multiple events. For a cell-month containing many small events, the aggregated sum suppresses the vague-number signal and may understate the Gumbel component's scale. The direction of this effect is conservative: event-level application would produce \emph{wider} $F_\text{obs}$ distributions (each small event carries high relative uncertainty), yielding a reversal rate at least as large as the 80.8\% reported here. The bounds-based aggregation (Constructor~1, summing low/best/high) has a parallel limitation: summing bounds assumes independent per-event coding errors, which is violated when events in the same cell-month share media sources or coders. A proper event-level analysis that combines event-level $F_\text{obs}$ distributions into cell-month aggregates is non-trivial and is left to future work; the aggregated results here should be read as illustrative of the direction and approximate magnitude of the effect.
+
+\paragraph{Per-violence-type analysis.}
+Table~\ref{tab:per_type} breaks the comparison down by UCDP violence type. State-based violence ($n = 10{,}760$) shows the lowest RVI reversal rate (79.3\%), consistent with state-based events being better documented and having higher fatality counts on average. Non-state violence ($n = 4{,}363$) shows the highest reversal rate (90.4\%) and is the only type where the RVI Cram\'er distance selects the honest version \emph{on average}---non-state events tend to have smaller counts where underreporting is most severe. One-sided violence ($n = 4{,}003$) falls in between at 84.6\%. A caveat: the per-type differences confound documentation quality with event-size distribution. Non-state events are both less well documented \emph{and} smaller on average; the higher reversal rate could reflect either factor or both.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        Violence type & $n$ & Classical & \multicolumn{2}{c}{Parametric} & \multicolumn{2}{c}{RVI Gumbel} \\
+        \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+         & & tight \% & reversal \% & BN agree \% & reversal \% & BN agree \% \\
+        \midrule
+        State-based & 10{,}760 & 100\% & 34.8\% & 93.3\% & 79.3\% & 78.2\% \\
+        Non-state & 4{,}363 & 100\% & 62.9\% & 94.1\% & 90.4\% & 90.2\% \\
+        One-sided & 4{,}003 & 100\% & 43.7\% & 94.3\% & 84.6\% & 84.1\% \\
+        \midrule
+        All & 19{,}397 & 100\% & 39.0\% & 98.1\%$^\dagger$ & 80.8\% & 98.5\%$^\dagger$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Ranking reversal rates by UCDP violence type. ``Classical tight~\%'' is the fraction of cell-months where classical CRPS selects the tight version. ``Reversal~\%'' is the fraction where the Cram\'er-distance reformulation reverses the ranking. ``BN agree'' is the Bessac--Naveau concordance---the fraction of cell-months where the Bessac--Naveau conditional-expectation correction agrees with the Cram\'er distance on which version wins---computed separately under each $F_\text{obs}$ constructor (parametric and RVI). The parametric constructor uses $\sigma_\text{rel} = 0.4$; the RVI Gumbel uses the regression coefficients of \citet{vesco2026uncertainty}. Per-type counts do not sum to the pooled total because the historical-statistics join (cells with $\geq 3$ active months) applies per type; 271 cell-months qualify in the pooled analysis but fall below the per-type activity threshold. $^\dagger$Pooled BN concordance uses $M = 2{,}000$ Monte Carlo draws; per-type rows use $M = 200$.}
+    \label{tab:per_type}
+\end{table}
+
+The per-type pattern is informative: the Cram\'er-distance reformulation is most consequential for the violence types where observational uncertainty is greatest, and least consequential where data quality is highest.
