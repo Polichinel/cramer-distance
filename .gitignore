@@ -14,3 +14,7 @@ paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
 paper/sections/*.aux
+
+# Source data (fetched, not committed)
+data/*
+!data/.gitkeep
