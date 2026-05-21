@@ -9,8 +9,7 @@ The integrand has a step function in z at z = y. Standard implementations
 either compute the kernel form from forecast samples or evaluate the
 integral analytically against parametric forecast families.
 
-This module implements the kernel form via samples — the same convention
-used by lab_anti_timid and the autoresearch experiments. The result is a
+This module implements the kernel form via samples. The result is a
 scalar score for a single (sample, observation) pair, or a vector for
 batched inputs.
 

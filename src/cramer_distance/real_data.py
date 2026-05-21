@@ -1,14 +1,17 @@
-"""Real-data empirical comparison for the fuzzy CRPS paper.
+"""Real-data empirical comparison for the Cramér distance paper.
 
-Loads UCDP/GED conflict data from views-datafactory, constructs simple
-forecasters from historical statistics, and scores them under classical
-CRPS and the Cramér-distance reformulation with two F_obs constructors.
+Loads UCDP/GED conflict data, constructs simple forecasters from
+historical statistics, and scores them under classical CRPS and the
+Cramér-distance reformulation with multiple F_obs constructors.
+Results are written to paper/data/.
 
 Run as a module:
 
     uv run python -m cramer_distance.real_data
 
-Dependencies: views-datafactory data directory (assembled + viewpoint).
+This module requires external data not shipped with the repo.
+Place source parquet in data/ (gitignored). Pre-computed results
+are in paper/data/ and can be used directly by figures.py.
 """
 
 from __future__ import annotations
@@ -20,12 +23,12 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
-# Original: from lab_core.feature_frame_loader import load_feature_frame
-# Standalone mode: pre-computed CSVs in paper/data/. Regeneration requires views-datafactory.
+# Data regeneration requires views-datafactory's feature frame loader.
+# When unavailable, pre-computed CSVs in paper/data/ serve all figures.
 try:
     from lab_core.feature_frame_loader import load_feature_frame
 except ImportError:
-    load_feature_frame = None
+    load_feature_frame = None  # noqa: N816
 from cramer_distance.classical_crps import brocker_smith_crps, classical_crps
 from cramer_distance.fuzzy_crps import empirical_cdf_from_samples, fuzzy_crps
 from cramer_distance.observation_uncertainty import (
@@ -41,11 +44,7 @@ from cramer_distance.observation_uncertainty import (
 # ---------------------------------------------------------------------------
 
 _VIEWPOINT_DEFAULT = (
-    Path(__file__).resolve().parents[2].parent
-    / "views-datafactory"
-    / "data"
-    / "viewpoint"
-    / "production_parity.parquet"
+    Path(__file__).resolve().parents[2] / "data" / "production_parity.parquet"
 )
 
 # Assembled grid time encoding: time_id 23869 = 1989-01
@@ -493,7 +492,7 @@ def summarise(df: pd.DataFrame) -> str:
 
 
 def main() -> None:
-    out = Path(__file__).resolve().parents[2] / "papers" / "fuzzy_crps" / "data"
+    out = Path(__file__).resolve().parents[2] / "paper" / "data"
     out.mkdir(parents=True, exist_ok=True)
 
     # All types pooled

@@ -145,7 +145,7 @@ def test_propriety_test_covers_several_true_mu_values() -> None:
     (b) a `@pytest.mark.parametrize("true_mu", [...])` decorator supplying
     at least 2 distinct values. (C-35 Decision: parametrise.)
     """
-    test_file = REPO_ROOT / "tests" / "test_lab_fuzzy_crps.py"
+    test_file = REPO_ROOT / "tests" / "test_cramer_distance.py"
     content = test_file.read_text()
 
     # Capture the decorator stack + function body for the propriety test.

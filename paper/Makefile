@@ -20,7 +20,7 @@ figures/step_vs_sigmoid.pdf figures/propriety_verification.pdf figures/uncertain
 	cd ../ && uv run python -m cramer_distance.figures
 
 # Real-data figure depends on pre-computed CSVs in data/.
-# To regenerate CSVs from scratch, you need views-datafactory access.
+# To regenerate CSVs, place source parquet in data/ and run cramer_distance.real_data.
 figures/real_data_comparison.pdf: data/real_data_scores.csv
 	cd ../ && uv run python -m cramer_distance.figures
 

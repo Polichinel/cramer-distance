@@ -1,7 +1,7 @@
-"""Figure generation for the Fuzzy CRPS paper.
+"""Figure generation for the Cramér distance paper.
 
 Run as a module to regenerate all PDF figures into
-papers/fuzzy_crps/figures/:
+paper/figures/:
 
     uv run python -m cramer_distance.figures
 
