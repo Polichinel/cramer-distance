@@ -5,7 +5,7 @@ paper/figures/:
 
     uv run python -m cramer_distance.figures
 
-Three figures:
+Four figures:
 
 1. step_vs_sigmoid.pdf — the visual argument. Shows the classical CRPS
    integrand (step function indicator) next to a smooth observational CDF,
@@ -17,6 +17,10 @@ Three figures:
 3. uncertainty_aware_ranking.pdf — bar chart of classical vs fuzzy CRPS
    for a "tight" and "honest" forecaster, demonstrating the ranking
    reversal that motivates fuzzy CRPS.
+
+4. real_data_comparison.pdf — reversal rates and score-difference
+   distributions on UCDP conflict data. Reads pre-computed CSVs from
+   paper/data/; skipped if the CSV is absent.
 """
 
 from __future__ import annotations

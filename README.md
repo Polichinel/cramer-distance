@@ -52,4 +52,4 @@ uv run python -m cramer_distance.real_data
 uv run pytest tests/
 ```
 
-51 tests pass. 3 tests fail on paper-content TODOs (missing caveat paragraphs and table header renames in the LaTeX) — these are writing tasks, not code bugs.
+63 tests pass. 3 tests fail on paper-content TODOs (missing caveat paragraphs and table header renames in the LaTeX) — these are writing tasks, not code bugs.
