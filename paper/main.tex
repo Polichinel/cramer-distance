@@ -9,11 +9,11 @@
 \maketitle
 
 \begin{abstract}
-\noindent Armed-conflict fatality counts are uncertain. UCDP data---the standard source for conflict forecasting---systematically underreport deaths, with estimated underreporting exceeding 100\% for low-fatality events---meaning the true count may be more than twice the recorded figure \citep{vesco2026uncertainty}. As the field moves from point-estimate predictions toward full predictive distributions \citep{hegre2025prediction}, the question of how to evaluate these distributions becomes critical. The dominant evaluation metric---the Continuous Ranked Probability Score (CRPS)---assumes the observed fatality count is exact. This creates a bias in model selection: CRPS rewards forecasts that concentrate on the reported number over forecasts that honestly represent the uncertainty around it. I show that replacing this assumption with a distribution reflecting what is actually known about the true value yields a well-established metric---the Cram\'er distance, which is simply the standard CRPS generalised from a single observed value to an uncertain observation---that reduces to standard CRPS when observations are precise. I provide three practical recipes for building the observation distribution from sources available to conflict researchers: from UCDP quality bounds, from the empirically grounded uncertainty model of \citet{vesco2026uncertainty}, and from a calibrated parametric default. On 19{,}397 UCDP cell-months, the reformulation reverses the model ranking in 39\% of cases; on operational predictions from HydraNet \citep{VonDerMaase2025hydranet}, a spatio-temporal deep-learning model for conflict forecasting, 99.4\% of cases where the standard metric favours overconfidence are reversed. The metric's reliability depends on the quality of the observation distribution; I characterise the conditions under which mis-specification introduces bias and verify consistency numerically across three distributional families.
+\noindent Armed-conflict fatality counts are uncertain. UCDP data---a standard source for conflict forecasting---systematically underreport deaths, with estimated underreporting exceeding 100\% for low-fatality events---meaning the true count may be more than twice the recorded figure \citep{vesco2026uncertainty}. As the field moves from point-estimate predictions toward full predictive distributions \citep{hegre2025prediction}, the question of how to evaluate these distributions becomes critical. The leading proper scoring rule for distributional forecasts---the Continuous Ranked Probability Score (CRPS)---assumes the observed fatality count is exact. This creates a bias in model governance---ranking, selection, ensemble construction---because CRPS rewards forecasts that concentrate on the reported number over forecasts that honestly represent the uncertainty around it. I show that replacing this assumption with a distribution reflecting what is actually known about the true value yields a well-established metric---the Cram\'er distance, which is simply the standard CRPS generalised from a single observed value to an uncertain observation---that reduces to standard CRPS when observations are precise. I demonstrate three principled constructions of the observation distribution from sources available to conflict researchers: from UCDP quality bounds, from the empirically grounded uncertainty model of \citet{vesco2026uncertainty}, and from a calibrated parametric default. On 19{,}397 UCDP cell-months, the reformulation reverses the model ranking in 39\% of cases; on operational predictions from HydraNet \citep{VonDerMaase2025hydranet}, a spatio-temporal deep-learning model for conflict forecasting, 99.4\% of cases where the standard metric favours overconfidence are reversed. The metric's reliability depends on the quality of the observation distribution; I characterise the conditions under which mis-specification introduces bias and verify consistency numerically across three distributional families.
 \end{abstract}
 
 \paragraph{Significance.}
-Forecast competitions and model selection procedures that use CRPS as their ranking metric---such as the 2023/24 VIEWS prediction challenge \citep{hegre2025prediction}---implicitly assume observations are exact. When this assumption is violated, competition rankings can systematically favour overconfident models. I show that accounting for observational uncertainty in forecast evaluation changes which forecast version is judged best, and demonstrate this on both synthetic and operational conflict forecasts (\S5). The argument applies to any domain where observations carry non-trivial uncertainty \citep{bessac2021forecast}.
+Model governance---ranking candidate forecasters, selecting ensemble members, deciding which model to deploy---relies on evaluation metrics that reflect the quantities we actually care about. When CRPS is used as the ranking metric, model selection implicitly assumes observations are exact. In domains where this assumption is violated, rankings systematically favour overconfident models: forecasts that concentrate on the reported number score better than forecasts that honestly represent the underlying uncertainty. I show that accounting for observational uncertainty in forecast evaluation changes which forecast version is judged best, and demonstrate this on both synthetic and operational conflict forecasts (\S6). The problem is acute in forecast competitions---the 2023/24 VIEWS prediction challenge \citep{hegre2025prediction} ranked distributional submissions using standard CRPS---but extends to any operational pipeline where model selection or ensemble construction depends on proper scoring rules applied to uncertain observations \citep{bessac2021forecast}.
 
 \section{Introduction}
 \input{sections/01_introduction}
@@ -27,11 +27,17 @@ Forecast competitions and model selection procedures that use CRPS as their rank
 \section{Consistency Properties}
 \input{sections/05_propriety}
 
-\section{Demonstration}
-\input{sections/06_demonstration}
+\section{Data and Forecasters}
+\input{sections/05_data_and_forecasters}
+
+\section{Results}
+\input{sections/06_results}
 
 \section{Discussion}
 \input{sections/07_discussion}
+
+\section{Conclusion}
+\input{sections/08_conclusion}
 
 \appendix
 

@@ -42,7 +42,7 @@ class TestConstructorCoverageGap:
         from pathlib import Path
 
         demo_tex = Path(__file__).resolve().parents[1] / (
-            "paper/sections/06_demonstration.tex"
+            "paper/sections/06_results.tex"
         )
         text = demo_tex.read_text()
         # The section should reference Constructor 1 / bounds-based F_obs
@@ -105,19 +105,18 @@ class TestMisspecificationBiasUnquantified:
     """The paper must quantify sensitivity to F_obs mis-specification."""
 
     def test_discussion_quantifies_misspecification_bias(self) -> None:
-        """§7 must contain a *numerical* characterisation of the bias.
+        """§6 must contain a *numerical* characterisation of the bias.
 
-        SF-2 resolved 2026-04-20: Misspecification-bias table added to §7
-        with argmin sweep over 7 obs_sigma_rel values.
+        SF-2 resolved 2026-04-20: Misspecification-bias table added to §7.
+        Moved to §6 (Results) in D-07 restructuring 2026-05-23.
         """
         import re
         from pathlib import Path
 
-        disc_tex = Path(__file__).resolve().parents[1] / (
-            "paper/sections/07_discussion.tex"
+        results_tex = Path(__file__).resolve().parents[1] / (
+            "paper/sections/06_results.tex"
         )
-        text = disc_tex.read_text()
-        # Look for concrete numbers in the sensitivity paragraph
+        text = results_tex.read_text()
         sensitivity_para = text.split("Sensitivity")[1] if "Sensitivity" in text else ""
         # Must contain at least one concrete numerical result like
         # "0.05", "0.15", "15%", a table, or a figure reference

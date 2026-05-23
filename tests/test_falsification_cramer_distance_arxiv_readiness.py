@@ -128,11 +128,11 @@ def test_demonstration_reversal_acknowledges_parameter_dependence() -> None:
         "behaviour"
     )
 
-    demo_tex = (
-        REPO_ROOT / "paper" / "sections" / "06_demonstration.tex"
+    results_tex = (
+        REPO_ROOT / "paper" / "sections" / "06_results.tex"
     ).read_text()
-    assert "When the reversal does not hold" in demo_tex, (
-        "section 6 must contain a 'When the reversal does not hold' "
+    assert "When the reversal does not hold" in results_tex, (
+        "results section must contain a 'When the reversal does not hold' "
         "paragraph that names the parameter regime (C-34 Decision)"
     )
 

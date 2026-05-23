@@ -1,0 +1,71 @@
+\subsection{Controlled demonstration}
+
+\paragraph{Setup.}
+Does accounting for observational uncertainty change which forecast version wins? I start with a controlled case using the synthetic forecast versions defined in \S5.2, with $y = 50$ and $\sigma_\text{rel} = 0.4$ (the Constructor~3 working default; see \S3 for calibration against the RVI Gumbel model).
+
+\paragraph{Results.}
+Classical CRPS ranks the tight version first: its narrow distribution is closer to the step at $y$ at almost every $z$, and the squared-area integrand is smaller. The reformulated metric, computed against a smooth $F_\text{obs}$ constructed via Constructor~3 ($\sigma_\text{rel} = 0.4$), reverses the ranking: the honest version wins. Figure~\ref{fig:reversal} shows the four scores. The reversal is a sign change---which version wins flips---not a numerical artifact. In this baseline case, the reversal is algebraically guaranteed: the Cram\'er distance is an $L^2$ metric, and $\sigma_\text{honest} = \sigma_\text{rel}$ means the honest version's CDF matches $F_\text{obs}$ exactly, which is the minimiser by construction. The substantive question is not \emph{whether} the reversal occurs at the matched parameterisation, but \emph{how far} the honest version can deviate from $F_\text{obs}$ and still beat the overconfident version.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/uncertainty_aware_ranking.pdf}
+    \caption{Ranking reversal between two forecast versions on a controlled example. Under classical CRPS the tight (overconfident) version wins; under the Cram\'er-distance reformulation the honest version wins. The reversal is qualitative---the sign of which version is better changes.}
+    \label{fig:reversal}
+\end{figure}
+
+The reversal does not depend on the honest version exactly matching $F_\text{obs}$: varying $\sigma_\text{honest}$ while holding $\sigma_\text{rel} = 0.4$ fixed, the reversal holds for $\sigma_\text{honest} \in [0.10, \, 0.85]$---the honest version can be $4\times$ too narrow or $2\times$ too wide and still beat the tight version.
+
+\paragraph{When the reversal does not hold.}
+The reversal disappears in two parameter regimes: (1)~when observational uncertainty is small ($\sigma_\text{rel} \leq 0.10$), so that $F_\text{obs}$ is close to the classical step function and the reformulated metric behaves like standard CRPS; and (2)~when the honest version is extremely wide ($\sigma_\text{honest} \geq 1.0$), so that its CDF deviates from $F_\text{obs}$ by more than the tight version does. In the first regime, the reformulation is unnecessary---observations are precise enough that classical CRPS is appropriate. In the second, the honest version is not honestly calibrated but genuinely overwide; the metric correctly penalises it. Detailed robustness analysis---including constructor comparison, location-error tolerance, and generalisation across distributional families---is in Appendix~\ref{sec:appendix_demo}.
+
+\subsection{Empirical comparison on UCDP conflict data}
+
+I score both synthetic forecast versions (\S5.2) under classical CRPS and the Cram\'er-distance reformulation with Constructor~3 ($\sigma_\text{rel} = 0.4$) on the UCDP sample described in \S5.1.
+
+Under classical CRPS the tight version wins in 100\% of cell-months---a direct consequence of both versions being centred on $y$ and CRPS's well-known preference for concentration. Under the Cram\'er-distance reformulation, the ranking reverses in 39\% of cell-months overall.\footnote{The reversal rate is sensitive to $\sigma_\text{rel}$: at $\sigma_\text{rel} = 0.3$ it drops to 12.6\%; at $\sigma_\text{rel} = 0.5$ it rises to 67.7\%.} The reversal rate depends sharply on forecast uncertainty: for cells with moderate uncertainty ($\hat{\sigma}_\text{cell} \leq 0.8$; $n = 4{,}716$), the honest version wins in \emph{every} cell-month. For cells with very high uncertainty ($\hat{\sigma}_\text{cell} > 1.0$; $n = 8{,}902$), the honest version is too wide and loses---exactly the regime identified in the controlled demonstration. Figure~\ref{fig:real_data} shows the reversal rate by uncertainty regime and the score-difference distribution.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/real_data_comparison.pdf}
+    \caption{Ranking reversal on UCDP conflict data (2020--2024, 19{,}397 cell-months). Left: reversal rate under the Cram\'er-distance reformulation as a function of the honest version's log-space uncertainty $\hat{\sigma}_\text{cell}$. The reversal is complete for $\hat{\sigma}_\text{cell} \leq 0.8$ and absent for $\hat{\sigma}_\text{cell} > 1.0$. Right: distribution of score differences; positive values indicate the honest version wins.}
+    \label{fig:real_data}
+\end{figure}
+
+Among cell-months with genuine UCDP low/best/high bounds, Constructor~1 produces a reversal rate of only 9.9\%---reflecting the fact that UCDP's coding ranges are narrow relative to the true observational uncertainty \citep{vesco2026uncertainty}. Under the RVI Gumbel mixture (Constructor~2), the reversal widens to 80.8\% of cell-months, capturing asymmetric underreporting that the symmetric parametric constructor misses. The Bessac--Naveau conditional-expectation correction \citep{bessac2021forecast} confirms the pattern, with 98.1\% concordance overall. A per-violence-type breakdown, constructor comparison details, and the unit-of-analysis caveat for Constructor~2 are in Appendix~\ref{sec:appendix_demo}.
+
+\subsection{Validation with an operational forecaster}
+
+\paragraph{Results.}
+In the full sample, classical CRPS strictly prefers the tight version in only 2.5\% of cell-months (167/6{,}725). A further 16.4\% (1{,}102 cell-months) are ties where the model predicts zero fatalities and both versions are degenerate; the remaining 81.1\% strictly prefer the full posterior. The dominance of the full posterior reflects HydraNet's typically large location errors; when the model misses the location, wider spread helps under classical CRPS simply by placing more mass near the target.
+
+The interesting regime is the 1{,}031 cell-months (15.3\%) where the model's prediction falls within a factor of two of the actual---where location error is moderate and the spread dimension becomes consequential. In this subset, classical CRPS selects the tight version in 167 cell-months (16.2\%). The Cram\'er-distance reformulation (Constructor~3, $\sigma_\text{rel} = 0.4$) reverses 166 of these 167 cases (99.4\%), selecting the full posterior instead. Under the RVI Gumbel constructor (Constructor~2), the reversal rate is 167/167 (100\%). The single cell-month that resists reversal under Constructor~3 is a high-fatality case (best $= 56$) where the full posterior has a log-space standard deviation of $0.77$---genuinely too wide relative to $F_\text{obs}$. The Cram\'er distance does not reward uncertainty indiscriminately but penalises spread that exceeds observational uncertainty, exactly as in the synthetic demonstration.
+
+\subsection{Sensitivity to $F_\text{obs}$ mis-specification}
+
+Could the metric's behaviour under a mis-specified $F_\text{obs}$ be worse than classical CRPS with no $F_\text{obs}$ at all? I quantify this by running the stochastic consistency check from \S4 (details in Appendix~\ref{sec:appendix_consistency}) under deliberate mis-specification. The true data-generating distribution is $\text{LogNormal}(\mu = 1.0, \sigma = 0.3)$; I construct $F_\text{obs}$ using $\sigma_\text{rel}$ values ranging from $0.1$ to $1.0$ and ask where the expected Cram\'er distance is minimised.
+
+Table~\ref{tab:misspec} shows the results. When $\sigma_\text{rel}$ matches the true $\sigma$ (ratio 1.0$\times$), the argmin falls exactly on $\mu_\text{true}$. Moderate overestimation (up to 2$\times$) shifts the argmin by at most one grid step ($+0.05$). Severe overestimation (3.3$\times$) shifts it by $+0.15$---meaningful but bounded. Underestimation produces no detectable bias in this sweep. For this log-normal DGP, the bias is monotonic in the mis-specification ratio; whether monotonicity holds across distributional families is untested, but the practical implication---a practitioner can bound the bias by bounding the mis-specification---applies whenever the relationship is monotone.
+
+The asymmetry has a structural explanation. When $\sigma_\text{rel}$ is underestimated, $F_\text{obs}$ approaches the degenerate step function at $y$, and the Cram\'er distance reduces to classical CRPS---which is proper, so the location argmin remains at $\mu_\text{true}$. When $\sigma_\text{rel}$ is overestimated, $F_\text{obs}$ is wider than the true observation noise; the log-normal right-skew of the widened $F_\text{obs}$ shifts the $L^2$-minimising location upward, producing positive bias. The same mechanism explains the scale-consistency convolution effect discussed in \S4 and Appendix~\ref{sec:appendix_consistency}: the metric measures distance from the observable distribution, which inherits the observation noise.
+
+A formal characterisation of this bias is an open problem.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{rrrr}
+        \toprule
+        $\sigma_\text{rel}$ & Ratio ($\sigma_\text{rel} / \sigma_\text{true}$) & Argmin $\hat{\mu}$ & Location bias ($\hat{\mu} - \mu_\text{true}$) \\
+        \midrule
+        0.1 & 0.3$\times$ & 1.000 & 0.000 \\
+        0.2 & 0.7$\times$ & 1.000 & 0.000 \\
+        0.3 & 1.0$\times$ & 1.000 & 0.000 \\
+        0.4 & 1.3$\times$ & 1.050 & $+$0.050 \\
+        0.6 & 2.0$\times$ & 1.050 & $+$0.050 \\
+        0.8 & 2.7$\times$ & 1.100 & $+$0.100 \\
+        1.0 & 3.3$\times$ & 1.150 & $+$0.150 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Argmin bias under mis-specified $F_\text{obs}$. The true DGP is $\text{LogNormal}(1.0, 0.3)$; $F_\text{obs}$ uses varying $\sigma_\text{rel}$. Monte Carlo expectation over 500 draws. Grid step $= 0.05$.}
+    \label{tab:misspec}
+\end{table}

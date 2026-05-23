@@ -60,7 +60,7 @@ def test_convolution_notation_correct_for_lognormal():
 def test_table_4_column_header_says_location():
     """Table 4's 'Propriety bias' column should explicitly say 'Location bias'
     to avoid confusion with the non-zero scale bias reported in §5."""
-    sec6 = (SECTIONS / "06_demonstration.tex").read_text()
+    sec6 = (SECTIONS / "06_results.tex").read_text()
 
     # Find the table header row
     # Current: "Location bias" (was "Propriety bias")

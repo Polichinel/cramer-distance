@@ -1,0 +1,23 @@
+\subsection{UCDP conflict data}
+
+I use observations from the UCDP Georeferenced Event Dataset (GED, data version 24.1, final-coded events; codebook: \citealt{ucdp_codebook}), using best-estimate fatality counts from 2020--2024 aggregated to the PRIO-GRID cell-month level (a $0.5^\circ \times 0.5^\circ$ geographic grid cell observed in a single calendar month, the standard spatiotemporal unit in VIEWS-format evaluations). I pool state-based, non-state, and one-sided violence and retain cell-months with at least one recorded fatality; historical uncertainty is derived from cells with $\geq 3$ active months during 1989--2019. This yields 19{,}397 cell-months from 2{,}065 cells. This sample covers the active-conflict portion of the evaluation space; the roughly 800{,}000 cell-months with zero recorded fatalities are excluded because $F_\text{obs}$ degenerates to a step function at zero and the reformulation reduces to classical CRPS. The results therefore characterise the regime where observational uncertainty is operative, not the full VIEWS evaluation grid.
+
+\subsection{Synthetic forecast versions}
+
+The controlled and empirical comparisons use two synthetic forecast versions, both centred on the reported best estimate $y$, isolating the spread dimension:
+\begin{itemize}
+    \item \textbf{Tight (overconfident):} $\text{LogNormal}(\log y, \, 0.05)$---concentrates nearly all probability mass on a single value, claiming to know the truth precisely.
+    \item \textbf{Honest:} A wider distribution matching the observational uncertainty. In the controlled demonstration, $\text{LogNormal}(\log y, \, \sigma_\text{honest})$ with $\sigma_\text{honest} = 0.4$ (matching the Constructor~3 default). In the empirical comparison, $\text{LogNormal}(\log y, \, \hat{\sigma}_\text{cell})$, where $\hat{\sigma}_\text{cell} = \sqrt{\log(1 + \text{CV}^2)}$ is derived from each cell's historical coefficient of variation. Median $\hat{\sigma}_\text{cell} = 0.97$; interquartile range $[0.81, 1.16]$; clipped to $[0.1, 2.0]$ (affecting 1.1\% of cell-months).
+\end{itemize}
+Both versions share the same location; the only difference is spread. Centering on the reported value $y$ is information unavailable at prediction time---this is a deliberate design choice that isolates whether the metric values uncertainty quantification, not whether it changes selection between genuinely different systems. The HydraNet validation (\S6.3) tests whether the reversal survives genuine location error.
+
+\subsection{HydraNet: an operational forecaster}
+
+HydraNet \citep{VonDerMaase2025hydranet} is a spatio-temporal Monte Carlo Dropout architecture trained on the Violence \& Impacts Early-Warning System (VIEWS) PRIO-GRID. The model produces 64 posterior samples per cell-month\footnote{The HydraNet architecture draws 128 samples per cell-month in its reference configuration; the validation here uses 64 due to local memory constraints.} for each violence type. I use state-based fatalities, the best-documented violence type with the lowest reversal rate in the synthetic comparison (79.3\% under RVI; Appendix~\ref{sec:appendix_demo})---the reformulation's impact is likely larger for non-state and one-sided violence, where observational uncertainty is greater.
+
+The model is trained on January 1990--December 2020 and produces 36-step-ahead validation predictions for January 2021--December 2024 (the standard VIEWS validation partition). I match these against UCDP state-based fatality actuals aggregated to the cell-month level, using the shortest-horizon (most recent) prediction available for each cell-month, yielding 6{,}725 cell-months across 1{,}173 cells where the reported best estimate is positive. For each cell-month, I construct two versions of the same model's output:
+\begin{itemize}
+    \item \textbf{Full posterior:} the model's 64 posterior samples, used directly as the forecast distribution.
+    \item \textbf{Tight:} $\text{LogNormal}(\log \bar{x}, \, 0.05)$ where $\bar{x}$ is the posterior mean---a version that retains the model's location estimate but discards its uncertainty quantification.
+\end{itemize}
+Both versions share the same location; the only difference is spread.

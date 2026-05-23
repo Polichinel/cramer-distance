@@ -1,0 +1,10 @@
+Model governance pipelines---ranking candidate forecasters, selecting ensemble members, deciding which model to deploy---that use CRPS as the ranking metric implicitly assume observations are exact. When this assumption is violated, selection systematically favours overconfident models. This applies to formal forecast competitions (e.g.\ the 2023/24 VIEWS prediction challenge \citep{hegre2025prediction}) but also to the routine model selection that underpins any operational forecasting system. The practical recommendation is not to replace CRPS with the Cram\'er-distance reformulation in all settings---classical CRPS is exactly right when observations are precise---but to use the reformulation as a secondary metric or robustness check in domains where observational uncertainty is known to be substantial. This recommendation rests on location-consistency verified numerically across three distributional families (\S6; Appendix~\ref{sec:appendix_demo}, Table~\ref{tab:multi_dgp}). Domains where this is immediately relevant include conflict forecasting \citep{hegre2019views,ucdp_codebook}, epidemiological surveillance \citep{gibbons2014measuring}, and economic forecasting from survey data.
+
+\paragraph{Open questions.}
+\begin{itemize}
+    \item Closed-form expressions for the reformulated metric when both $F_\text{pred}$ and $F_\text{obs}$ belong to common parametric families (log-normal, gamma, Weibull) would speed evaluation and enable analytical optimisation.
+    \item A formal Br\"ocker decomposition of the reformulated metric into reliability, resolution, and observational-uncertainty components.
+    \item An analytical proof of consistency under stochastic observations via the energy-distance framework, with explicit conditions on the $F_\text{obs}$ constructor.
+    \item Empirical comparison of model rankings on operational benchmarks (conflict forecasting, weather prediction, epidemiological surveillance) under classical and reformulated CRPS with each constructor.
+    \item Convergence analysis: how does the bias from a mis-specified $F_\text{obs}$ scale with the magnitude and direction of the mis-specification?
+\end{itemize}

@@ -77,7 +77,7 @@ def test_subscript_notation_uses_text_for_word_abbreviations():
     subscripts.
     Resolution: changed σ_h → σ_\text{h}, μ_{\log} → μ_{\text{log}},
     μ_g → μ_\text{g}, β_g → β_\text{g}."""
-    sec6 = (SECTIONS / "06_demonstration.tex").read_text()
+    sec6 = (SECTIONS / "06_results.tex").read_text()
 
     violations = []
 
