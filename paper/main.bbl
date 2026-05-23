@@ -52,6 +52,13 @@ Ferro, C. A.~T. (2017b).
 \newblock {\em Quarterly Journal of the Royal Meteorological Society},
   143(708):2665--2676.
 
+\bibitem[Gal and Ghahramani, 2016]{gal2016dropout}
+Gal, Y. and Ghahramani, Z. (2016).
+\newblock Dropout as a {B}ayesian approximation: Representing model uncertainty
+  in deep learning.
+\newblock In {\em Proceedings of the 33rd International Conference on Machine
+  Learning}, pages 1050--1059.
+
 \bibitem[Gibbons et~al., 2014]{gibbons2014measuring}
 Gibbons, C.~L., Mangen, M.-J.~J., Plass, D., Havelaar, A.~H., Brooke, R.~J.,
   Kramarz, P., Peterson, K.~L., Stuurman, A.~L., Cassini, A., F{\`e}vre, E.~M.,
