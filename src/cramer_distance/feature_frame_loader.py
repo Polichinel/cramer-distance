@@ -121,7 +121,7 @@ def load_feature_frame(
 # ---------------------------------------------------------------------------
 
 _DEFAULT_PREDICTIONS_DIR = (
-    Path(__file__).resolve().parents[2] / "data" / "predictions"
+    Path(__file__).resolve().parents[2] / "data" / "predictions_purple_alien"
 )
 
 

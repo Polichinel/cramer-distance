@@ -1,5 +1,8 @@
+\paragraph{From binary to continuous.}
+\citet{matheson1976scoring} show that CRPS inherits strict propriety from a simpler object: at each threshold $z$, the binary quadratic scoring rule evaluates how well $F_\text{pred}(z)$ predicts the indicator $\mathbf{1}\{y \le z\}$, and integration over all thresholds aggregates these binary assessments into a single continuous score. The indicator is deterministic---$0$ or $1$ depending on whether $y \le z$. Replacing it with a smooth $F_\text{obs}(z) \in [0, 1]$ changes each binary observation from certain to probabilistic but preserves the $L^2$ integration structure. This motivates a direct generalisation; its consistency properties are verified in \S5.
+
 \paragraph{Reformulation.}
-The fix is straightforward: instead of comparing the forecast against a hard step at the reported value, I compare it against a smooth distribution that represents what is actually known about the observation. Concretely, I replace the step indicator in the CRPS integrand with a smooth observational CDF $F_\text{obs}(z)$:
+Instead of comparing the forecast against a hard step at the reported value, I compare it against a smooth distribution that represents what is actually known about the observation. Concretely, I replace the step indicator in the CRPS integrand with a smooth observational CDF $F_\text{obs}(z)$:
 %
 \begin{equation}
     \text{CRPS}_\text{obs}(F_\text{pred}, F_\text{obs}) = \int_{-\infty}^{\infty} \bigl( F_\text{pred}(z) - F_\text{obs}(z) \bigr)^2 \, dz.

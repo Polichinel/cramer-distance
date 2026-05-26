@@ -503,8 +503,8 @@ def _month_id_to_year_month(month_id: int) -> tuple[int, int]:
 
 def score_hydranet(
     violence_type: int = 1,
-    eval_start: int = 2021,
-    eval_end: int = 2024,
+    eval_start: int = 2017,
+    eval_end: int = 2020,
     relative_sigma: float = 0.4,
     tight_sigma: float = 0.05,
     n_bs_draws: int = 2000,
