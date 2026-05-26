@@ -125,6 +125,12 @@ Matheson, J.~E. and Winkler, R.~L. (1976).
 \newblock Scoring rules for continuous probability distributions.
 \newblock {\em Management Science}, 22(10):1087--1096.
 
+\bibitem[Pinson and Hagedorn, 2012]{pinson2012verification}
+Pinson, P. and Hagedorn, R. (2012).
+\newblock Verification of the {ECMWF} ensemble forecasts of wind speed against
+  analyses and observations.
+\newblock {\em Meteorological Applications}, 19(4):484--500.
+
 \bibitem[Sz{\'e}kely and Rizzo, 2013]{szekely2013energy}
 Sz{\'e}kely, G.~J. and Rizzo, M.~L. (2013).
 \newblock Energy statistics: A class of statistics based on distances.

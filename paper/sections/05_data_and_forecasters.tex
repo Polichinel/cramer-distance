@@ -13,11 +13,27 @@ Both versions share the same location; the only difference is spread. Centering 
 
 \subsection{HydraNet: an operational forecaster}
 
-HydraNet \citep{VonDerMaase2025hydranet} is a deep neural network for conflict forecasting that uses Monte Carlo Dropout \citep{gal2016dropout} for uncertainty quantification. The model is trained on VIEWS data at PRIO-GRID resolution and produces 64 MC Dropout predictive samples per cell-month\footnote{The HydraNet architecture draws 128 samples per cell-month in its reference configuration; the validation here uses 64 due to local memory constraints.} for each violence type. I use state-based fatalities, the best-documented violence type with the lowest reversal rate in the synthetic comparison (79.3\% under RVI; Appendix~\ref{sec:appendix_demo})---the reformulation's impact is likely larger for non-state and one-sided violence, where observational uncertainty is greater.
+HydraNet \citep{VonDerMaase2025hydranet} is a deep neural network for conflict forecasting that uses Monte Carlo Dropout \citep{gal2016dropout} for uncertainty quantification. The model is trained on VIEWS data at PRIO-GRID resolution and produces 64 MC Dropout predictive samples per cell-month\footnote{The HydraNet architecture draws 128 samples per cell-month in its reference configuration; the validation here uses 64 due to local memory constraints.} for each violence type. I test all three violence types to parallel the per-type structure of the synthetic comparison (Table~\ref{tab:per_type}).
 
-The model is trained on January 1990--December 2020 and produces 36-step-ahead validation predictions for January 2021--December 2024 (the standard VIEWS validation partition). I match these against UCDP state-based fatality actuals aggregated to the cell-month level, using the shortest-horizon (most recent) prediction available for each cell-month, yielding 6{,}725 cell-months across 1{,}173 cells where the reported best estimate is positive. For each cell-month, I construct two versions of the same model's output:
+The model is trained on January 1990--December 2016 and produces 36-step-ahead calibration predictions for January 2017--December 2020, using 13 rolling-origin sequences.\footnote{The calibration partition overlaps with training data, making this a weaker out-of-sample test than a held-out validation partition. The reversal pattern is nonetheless informative: it tests whether the reformulation changes rankings between the same model's full and stripped uncertainty, not whether the model generalises well.} I match these against UCDP fatality actuals for each violence type, using the shortest-horizon prediction available for each cell-month. Table~\ref{tab:hydranet_sample} reports the sample sizes. For each cell-month, I construct two versions of the same model's output:
 \begin{itemize}
     \item \textbf{Full MC Dropout:} the model's 64 predictive samples, used directly as the forecast distribution.
     \item \textbf{Tight:} $\text{LogNormal}(\log \bar{x}, \, 0.05)$ where $\bar{x}$ is the predictive mean---a version that retains the model's location estimate but discards its uncertainty quantification.
 \end{itemize}
 Both versions share the same location; the only difference is spread.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lrrr}
+        \toprule
+        Violence type & Cell-months & Unique cells & Factor-of-two \\
+        \midrule
+        State-based & 5{,}372 & 937 & 589 (11.0\%) \\
+        Non-state & 2{,}130 & 549 & 188 (8.8\%) \\
+        One-sided & 2{,}702 & 816 & 148 (5.5\%) \\
+        \bottomrule
+    \end{tabular}
+    \caption{HydraNet calibration sample sizes by violence type. ``Cell-months'' counts cell-months where the reported best estimate is positive. ``Factor-of-two'' counts cell-months where the model's predictive mean falls within a factor of two of the reported value---the regime where predictive-location error is moderate and the spread dimension becomes consequential.}
+    \label{tab:hydranet_sample}
+\end{table}

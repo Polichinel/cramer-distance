@@ -31,14 +31,58 @@ Under classical CRPS the tight version wins in 100\% of cell-months---a direct c
     \label{fig:real_data}
 \end{figure}
 
-Among cell-months with genuine UCDP low/best/high bounds, Constructor~1 produces a reversal rate of only 9.9\%---reflecting the fact that UCDP's coding ranges are narrow relative to the true observational uncertainty \citep{vesco2026uncertainty}. Under the RVI Gumbel mixture (Constructor~2), the reversal widens to 80.8\% of cell-months, capturing asymmetric underreporting that the symmetric parametric constructor misses. The Bessac--Naveau conditional-expectation correction \citep{bessac2021forecast} confirms the pattern, with 98.1\% concordance overall. A per-violence-type breakdown, constructor comparison details, and the unit-of-analysis caveat for Constructor~2 are in Appendix~\ref{sec:appendix_demo}.
+Among cell-months with genuine UCDP low/best/high bounds, Constructor~1 produces a reversal rate of only 9.9\%---reflecting the fact that UCDP's coding ranges are narrow relative to the true observational uncertainty \citep{vesco2026uncertainty}. Under the RVI Gumbel mixture (Constructor~2), the reversal widens to 80.8\% of cell-months, capturing asymmetric underreporting that the symmetric parametric constructor misses. The Bessac--Naveau conditional-expectation correction \citep{bessac2021forecast} confirms the pattern, with 98.1\% concordance overall. Constructor comparison details and the unit-of-analysis caveat for Constructor~2 are in Appendix~\ref{sec:appendix_demo}.
+
+\paragraph{Per-violence-type analysis.}
+Table~\ref{tab:per_type} breaks the comparison down by UCDP violence type. State-based violence ($n = 10{,}760$) shows the lowest RVI reversal rate (79.3\%), consistent with state-based events being better documented and having higher fatality counts on average. Non-state violence ($n = 4{,}363$) shows the highest reversal rate (90.4\%) and is the only type where the RVI Cram\'er distance selects the honest version \emph{on average}---non-state events tend to have smaller counts where underreporting is most severe. One-sided violence ($n = 4{,}003$) falls in between at 84.6\%. A caveat: the per-type differences confound documentation quality with event-size distribution. Non-state events are both less well documented \emph{and} smaller on average; the higher reversal rate could reflect either factor or both. The gradient is nonetheless informative: the Cram\'er-distance reformulation is most consequential for the violence types where observational uncertainty is greatest, and least consequential where data quality is highest.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        Violence type & $n$ & Classical & \multicolumn{2}{c}{Parametric} & \multicolumn{2}{c}{RVI Gumbel} \\
+        \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+         & & tight \% & reversal \% & BN agree \% & reversal \% & BN agree \% \\
+        \midrule
+        State-based & 10{,}760 & 100\% & 34.8\% & 93.3\% & 79.3\% & 78.2\% \\
+        Non-state & 4{,}363 & 100\% & 62.9\% & 94.1\% & 90.4\% & 90.2\% \\
+        One-sided & 4{,}003 & 100\% & 43.7\% & 94.3\% & 84.6\% & 84.1\% \\
+        \midrule
+        All & 19{,}397 & 100\% & 39.0\% & 98.1\%$^\dagger$ & 80.8\% & 98.5\%$^\dagger$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Ranking reversal rates by UCDP violence type. ``Classical tight~\%'' is the fraction of cell-months where classical CRPS selects the tight version. ``Reversal~\%'' is the fraction where the Cram\'er-distance reformulation reverses the ranking. ``BN agree'' is the Bessac--Naveau concordance---the fraction of cell-months where the Bessac--Naveau conditional-expectation correction agrees with the Cram\'er distance on which version wins---computed separately under each $F_\text{obs}$ constructor (parametric and RVI). The parametric constructor uses $\sigma_\text{rel} = 0.4$; the RVI Gumbel uses the regression coefficients of \citet{vesco2026uncertainty}. Per-type counts do not sum to the pooled total because the historical-statistics join (cells with $\geq 3$ active months) applies per type; 271 cell-months qualify in the pooled analysis but fall below the per-type activity threshold. $^\dagger$Pooled BN concordance uses $M = 2{,}000$ Monte Carlo draws; per-type rows use $M = 200$.}
+    \label{tab:per_type}
+\end{table}
 
 \subsection{Validation with an operational forecaster}
 
-\paragraph{Results.}
-In the full sample, classical CRPS strictly prefers the tight version in only 2.5\% of cell-months (167/6{,}725). A further 16.4\% (1{,}102 cell-months) are ties where the model predicts zero fatalities and both versions are degenerate; the remaining 81.1\% strictly prefer the full MC Dropout version. The dominance of the full MC Dropout version reflects HydraNet's typically large predictive-location errors; when the model misses the target value, wider spread helps under classical CRPS simply by placing more mass near the target.
+\paragraph{State-based results.}
+I begin with state-based violence, the best-documented type. In the full sample (5{,}372 cell-months), classical CRPS strictly prefers the tight version in only 2.1\% of cell-months (115/5{,}372). A further 36.5\% (1{,}962 cell-months) are ties where the model predicts zero fatalities and both versions are degenerate; the remaining 61.3\% strictly prefer the full MC Dropout version. The dominance of the full MC Dropout version reflects HydraNet's typically large predictive-location errors; when the model misses the target value, wider spread helps under classical CRPS simply by placing more mass near the target.
 
-The interesting regime is the 1{,}031 cell-months (15.3\%) where the model's prediction falls within a factor of two of the actual---where predictive-location error is moderate and the spread dimension becomes consequential. In this subset, classical CRPS selects the tight version in 167 cell-months (16.2\%). The Cram\'er-distance reformulation (Constructor~3, $\sigma_\text{rel} = 0.4$) reverses 166 of these 167 cases (99.4\%), selecting the full MC Dropout version instead. Under the RVI Gumbel constructor (Constructor~2), the reversal rate is 167/167 (100\%). The single cell-month that resists reversal under Constructor~3 is a high-fatality case (best $= 56$) where the full MC Dropout version has a log-space standard deviation of $0.77$---genuinely too wide relative to $F_\text{obs}$. The Cram\'er distance does not reward uncertainty indiscriminately but penalises spread that exceeds observational uncertainty, exactly as in the synthetic demonstration.
+The interesting regime is the 589 cell-months (11.0\%) where the model's prediction falls within a factor of two of the actual---where predictive-location error is moderate and the spread dimension becomes consequential. In this subset, classical CRPS selects the tight version in 115 cell-months (19.5\%). The Cram\'er-distance reformulation (Constructor~3, $\sigma_\text{rel} = 0.4$) reverses 114 of these 115 cases (99.1\%), selecting the full MC Dropout version instead. Under the RVI Gumbel constructor (Constructor~2), the reversal rate is 110/115 (95.7\%). The cell-months that resist reversal are high-fatality cases where the full MC Dropout version's spread genuinely exceeds $F_\text{obs}$---the Cram\'er distance penalises overwide uncertainty, exactly as in the synthetic demonstration.
+
+\paragraph{Per-type analysis.}
+Table~\ref{tab:hydranet_reversal} extends the analysis to all three violence types. The reversal pattern holds across types: in the factor-of-two subset, the parametric constructor reverses $\geq 94\%$ and the RVI constructor reverses $\geq 96\%$ of classical tight-version preferences. One-sided violence shows 100\% reversal under both constructors, consistent with one-sided events carrying the highest observational uncertainty (small counts, limited documentation).
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{lrrrrr}
+        \toprule
+        Violence type & $n$ & Classical & \multicolumn{2}{c}{Reversal rate} \\
+        \cmidrule(lr){4-5}
+         & & tight \% & Parametric & RVI Gumbel \\
+        \midrule
+        State-based & 589 & 19.5\% & 99.1\% & 95.7\% \\
+        Non-state & 188 & 28.7\% & 94.4\% & 98.1\% \\
+        One-sided & 148 & 24.3\% & 100.0\% & 100.0\% \\
+        \bottomrule
+    \end{tabular}
+    \caption{HydraNet ranking reversal in the factor-of-two subset by violence type. $n$ is the number of cell-months where the model's predictive mean falls within a factor of two of the reported value. ``Classical tight~\%'' is the fraction where classical CRPS selects the tight version. ``Reversal rate'' is the fraction of those classical tight selections that the Cram\'er-distance reformulation reverses. The parametric constructor uses $\sigma_\text{rel} = 0.4$; the RVI Gumbel uses the regression coefficients of \citet{vesco2026uncertainty}.}
+    \label{tab:hydranet_reversal}
+\end{table}
 
 \subsection{Sensitivity to $F_\text{obs}$ mis-specification}
 

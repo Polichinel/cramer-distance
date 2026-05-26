@@ -23,12 +23,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
-# Data regeneration requires views-datafactory's feature frame loader.
-# When unavailable, pre-computed CSVs in paper/data/ serve all figures.
-try:
-    from lab_core.feature_frame_loader import load_feature_frame
-except ImportError:
-    load_feature_frame = None  # noqa: N816
+from cramer_distance.feature_frame_loader import load_feature_frame, load_prediction_frame
 from cramer_distance.classical_crps import brocker_smith_crps, classical_crps
 from cramer_distance.fuzzy_crps import empirical_cdf_from_samples, fuzzy_crps
 from cramer_distance.observation_uncertainty import (
@@ -252,7 +247,8 @@ def score_cell_month(
     relative_sigma: float = 0.4,
     n_bs_draws: int = 2000,
     bs_seed: int = 0,
-    violence_type: int = 1,  # passed to RVI constructor (no-op: preferred spec pools all types)
+    violence_type: int = 1,
+    skip_bs: bool = False,
 ) -> dict[str, float | None]:
     """Score both forecasters under classical CRPS + all constructors + BS."""
     # Classical CRPS
@@ -269,11 +265,14 @@ def score_cell_month(
     honest_parametric = fuzzy_crps(f_honest, f_obs_param, grid_min=0.0, grid_max=grid_max, grid_n=4001)
 
     # Bröcker-Smith: E[CRPS(F, Y)] where Y ~ F_obs (parametric)
-    obs_draws = sample_from_f_obs_parametric(
-        best, relative_sigma=relative_sigma, n=n_bs_draws, seed=bs_seed,
-    )
-    tight_bs = brocker_smith_crps(tight_samples, obs_draws)
-    honest_bs = brocker_smith_crps(honest_samples, obs_draws)
+    tight_bs = None
+    honest_bs = None
+    if not skip_bs:
+        obs_draws = sample_from_f_obs_parametric(
+            best, relative_sigma=relative_sigma, n=n_bs_draws, seed=bs_seed,
+        )
+        tight_bs = brocker_smith_crps(tight_samples, obs_draws)
+        honest_bs = brocker_smith_crps(honest_samples, obs_draws)
 
     # Constructor 1: bounds-based F_obs (only when bounds are valid)
     tight_bounds = None
@@ -291,11 +290,14 @@ def score_cell_month(
     honest_rvi = fuzzy_crps(f_honest, f_obs_rvi, grid_min=0.0, grid_max=grid_max, grid_n=4001)
 
     # BS with RVI draws
-    rvi_draws = sample_from_f_obs_rvi_gumbel(
-        best, violence_type=violence_type, n=n_bs_draws, seed=bs_seed,
-    )
-    tight_rvi_bs = brocker_smith_crps(tight_samples, rvi_draws)
-    honest_rvi_bs = brocker_smith_crps(honest_samples, rvi_draws)
+    tight_rvi_bs = None
+    honest_rvi_bs = None
+    if not skip_bs:
+        rvi_draws = sample_from_f_obs_rvi_gumbel(
+            best, violence_type=violence_type, n=n_bs_draws, seed=bs_seed,
+        )
+        tight_rvi_bs = brocker_smith_crps(tight_samples, rvi_draws)
+        honest_rvi_bs = brocker_smith_crps(honest_samples, rvi_draws)
 
     return {
         "tight_classical": tight_classical,
@@ -487,6 +489,163 @@ def summarise(df: pd.DataFrame) -> str:
 
 
 # ---------------------------------------------------------------------------
+# HydraNet scoring
+# ---------------------------------------------------------------------------
+
+_TOV_TARGET_MAP = {1: "lr_sb_best", 2: "lr_ns_best", 3: "lr_os_best"}
+
+
+def _month_id_to_year_month(month_id: int) -> tuple[int, int]:
+    year = (month_id - 1) // 12 + 1980
+    month = (month_id - 1) % 12 + 1
+    return year, month
+
+
+def score_hydranet(
+    violence_type: int = 1,
+    eval_start: int = 2021,
+    eval_end: int = 2024,
+    relative_sigma: float = 0.4,
+    tight_sigma: float = 0.05,
+    n_bs_draws: int = 2000,
+    seed: int = 0,
+    predictions_dir: Path | None = None,
+) -> pd.DataFrame:
+    """Score HydraNet MC Dropout predictions against UCDP observations.
+
+    For each cell-month, constructs two versions of the same model output:
+      - Full MC Dropout: the 64 predictive samples as empirical CDF
+      - Tight: LogNormal(log(mean), 0.05) — discards uncertainty quantification
+
+    Returns a DataFrame matching the hydranet_scores_*.csv format.
+    """
+    target = _TOV_TARGET_MAP[violence_type]
+    tov_label = _TOV_MAP[violence_type]
+    print(f"\nScoring HydraNet ({tov_label}, target={target})...")
+
+    # Load predictions
+    pf = load_prediction_frame(target, predictions_dir=predictions_dir)
+    pred_times = pf["time_ids"]
+    pred_units = pf["unit_ids"]
+    pred_samples = pf["predictions"]
+
+    # Build prediction DataFrame for joining
+    pred_df = pd.DataFrame({
+        "month_id": pred_times,
+        "priogrid_gid": pred_units,
+    })
+    pred_df["year"] = pred_df["month_id"].apply(lambda m: _month_id_to_year_month(m)[0])
+    pred_df["month"] = pred_df["month_id"].apply(lambda m: _month_id_to_year_month(m)[1])
+    pred_df["pred_idx"] = np.arange(len(pred_df))
+
+    # Filter to eval window
+    pred_df = pred_df[
+        (pred_df["year"] >= eval_start) & (pred_df["year"] <= eval_end)
+    ].copy()
+
+    # Load UCDP observations
+    print(f"  Loading observations (type={tov_label})...")
+    obs = load_observations(
+        eval_start=eval_start, eval_end=eval_end, violence_type=violence_type,
+    )
+    print(f"  {len(obs)} active cell-months")
+
+    # Join predictions with observations
+    merged = obs.merge(
+        pred_df[["priogrid_gid", "year", "month", "pred_idx"]],
+        on=["priogrid_gid", "year", "month"],
+        how="inner",
+    )
+    print(f"  {len(merged)} cell-months after join")
+
+    rows = []
+    n = len(merged)
+    rng = np.random.default_rng(seed)
+
+    for i, r in merged.iterrows():
+        if len(rows) > 0 and len(rows) % 1000 == 0:
+            print(f"  scoring {len(rows)}/{n}...")
+
+        samples = pred_samples[r["pred_idx"]].astype(np.float64)
+        post_mean = float(samples.mean())
+        best = float(r["best"])
+
+        # When the model predicts zero, both versions are degenerate
+        if post_mean < 1e-4:
+            zero_samples = np.zeros(4000)
+            scores = score_cell_month(
+                zero_samples, zero_samples,
+                best=best, low=float(r["low"]), high=float(r["high"]),
+                relative_sigma=relative_sigma,
+                bs_seed=seed + len(rows) + 200000,
+                violence_type=violence_type,
+                skip_bs=True,
+            )
+        else:
+            log_mu = np.log(post_mean)
+            tight_samples = np.exp(rng.normal(log_mu, tight_sigma, 4000))
+            scores = score_cell_month(
+                tight_samples, samples,
+                best=best, low=float(r["low"]), high=float(r["high"]),
+                relative_sigma=relative_sigma,
+                bs_seed=seed + len(rows) + 200000,
+                violence_type=violence_type,
+                skip_bs=True,
+            )
+
+        rows.append({
+            "priogrid_gid": r["priogrid_gid"],
+            "year": r["year"],
+            "month": r["month"],
+            "best": best,
+            "low": r["low"],
+            "high": r["high"],
+            "post_mean": post_mean,
+            **scores,
+        })
+
+    return pd.DataFrame(rows)
+
+
+def summarise_hydranet(df: pd.DataFrame) -> str:
+    """Pretty-print summary of HydraNet scoring results."""
+    lines = []
+    lines.append(f"HydraNet scoring: {len(df)} cell-months")
+    lines.append("")
+
+    # Classical CRPS
+    tight_wins = (df["tight_classical"] < df["honest_classical"]).sum()
+    ties = (df["tight_classical"] == df["honest_classical"]).sum()
+    honest_wins = (df["tight_classical"] > df["honest_classical"]).sum()
+    lines.append(f"Classical CRPS: tight wins {tight_wins} ({tight_wins/len(df):.1%}), "
+                 f"ties {ties} ({ties/len(df):.1%}), "
+                 f"honest wins {honest_wins} ({honest_wins/len(df):.1%})")
+
+    # Factor-of-two subset
+    ratio = df["post_mean"] / df["best"].clip(lower=1e-6)
+    close_mask = (ratio >= 0.5) & (ratio <= 2.0)
+    close = df[close_mask]
+    if len(close) > 0:
+        lines.append(f"\nFactor-of-two subset: {len(close)} cell-months ({len(close)/len(df):.1%})")
+        classical_tight_mask = close["tight_classical"] < close["honest_classical"]
+        tight_close = classical_tight_mask.sum()
+        lines.append(f"  Classical tight wins: {tight_close} ({tight_close/len(close):.1%})")
+
+        if tight_close > 0 and "tight_parametric" in close.columns:
+            # Reversal: classical preferred tight, but parametric prefers honest
+            classical_tight = close[classical_tight_mask]
+            reversal_p = (classical_tight["honest_parametric"] < classical_tight["tight_parametric"]).sum()
+            lines.append(f"  Parametric reversal: {reversal_p}/{tight_close} ({reversal_p/tight_close:.1%})")
+
+        if tight_close > 0 and "tight_rvi" in close.columns:
+            classical_tight = close[classical_tight_mask]
+            reversal_r = (classical_tight["honest_rvi"] < classical_tight["tight_rvi"]).sum()
+            lines.append(f"  RVI reversal: {reversal_r}/{tight_close} ({reversal_r/tight_close:.1%})")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -513,6 +672,22 @@ def main() -> None:
         print(summarise(res_tov))
         res_tov.to_csv(out / f"real_data_scores_{label.replace('-', '_')}.csv", index=False)
         print(f"\nSaved to {out / f'real_data_scores_{label.replace(chr(45), chr(95))}.csv'}")
+
+    # HydraNet per-type scoring
+    hydra_labels = {1: "hydranet_scores_state_based.csv",
+                    2: "hydranet_scores_non_state.csv",
+                    3: "hydranet_scores_one_sided.csv"}
+    for tov in (1, 2, 3):
+        label = _TOV_MAP[tov]
+        print(f"\n{'='*60}")
+        print(f"HydraNet scoring: {label} (type_of_violence={tov})")
+        print(f"{'='*60}")
+        hydra = score_hydranet(violence_type=tov)
+        print()
+        print(summarise_hydranet(hydra))
+        fname = hydra_labels[tov]
+        hydra.to_csv(out / fname, index=False)
+        print(f"\nSaved to {out / fname}")
 
 
 if __name__ == "__main__":

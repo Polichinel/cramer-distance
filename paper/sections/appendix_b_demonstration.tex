@@ -81,27 +81,3 @@ I apply Constructor~2 (the RVI Gumbel mixture defined in \S3) and repeat the com
 
 A structural limitation applies, however: the \citet{vesco2026uncertainty} regression coefficients predict uncertainty for \emph{individual coded events}, whereas the comparison above aggregates events to cell-months by summing best estimates before applying the RVI constructor. This is a unit-of-analysis mismatch---the model's vague-number dummies are designed for event-level reported values, not for sums across multiple events. For a cell-month containing many small events, the aggregated sum suppresses the vague-number signal and may understate the Gumbel component's scale. The direction of this effect is conservative: event-level application would produce \emph{wider} $F_\text{obs}$ distributions (each small event carries high relative uncertainty), yielding a reversal rate at least as large as the 80.8\% reported here. The bounds-based aggregation (Constructor~1, summing low/best/high) has a parallel limitation: summing bounds assumes independent per-event coding errors, which is violated when events in the same cell-month share media sources or coders. A proper event-level analysis that combines event-level $F_\text{obs}$ distributions into cell-month aggregates is non-trivial and is left to future work; the aggregated results here should be read as illustrative of the direction and approximate magnitude of the effect.
 
-\paragraph{Per-violence-type analysis.}
-Table~\ref{tab:per_type} breaks the comparison down by UCDP violence type. State-based violence ($n = 10{,}760$) shows the lowest RVI reversal rate (79.3\%), consistent with state-based events being better documented and having higher fatality counts on average. Non-state violence ($n = 4{,}363$) shows the highest reversal rate (90.4\%) and is the only type where the RVI Cram\'er distance selects the honest version \emph{on average}---non-state events tend to have smaller counts where underreporting is most severe. One-sided violence ($n = 4{,}003$) falls in between at 84.6\%. A caveat: the per-type differences confound documentation quality with event-size distribution. Non-state events are both less well documented \emph{and} smaller on average; the higher reversal rate could reflect either factor or both.
-
-\begin{table}[h]
-    \centering
-    \small
-    \begin{tabular}{lrrrrrr}
-        \toprule
-        Violence type & $n$ & Classical & \multicolumn{2}{c}{Parametric} & \multicolumn{2}{c}{RVI Gumbel} \\
-        \cmidrule(lr){4-5} \cmidrule(lr){6-7}
-         & & tight \% & reversal \% & BN agree \% & reversal \% & BN agree \% \\
-        \midrule
-        State-based & 10{,}760 & 100\% & 34.8\% & 93.3\% & 79.3\% & 78.2\% \\
-        Non-state & 4{,}363 & 100\% & 62.9\% & 94.1\% & 90.4\% & 90.2\% \\
-        One-sided & 4{,}003 & 100\% & 43.7\% & 94.3\% & 84.6\% & 84.1\% \\
-        \midrule
-        All & 19{,}397 & 100\% & 39.0\% & 98.1\%$^\dagger$ & 80.8\% & 98.5\%$^\dagger$ \\
-        \bottomrule
-    \end{tabular}
-    \caption{Ranking reversal rates by UCDP violence type. ``Classical tight~\%'' is the fraction of cell-months where classical CRPS selects the tight version. ``Reversal~\%'' is the fraction where the Cram\'er-distance reformulation reverses the ranking. ``BN agree'' is the Bessac--Naveau concordance---the fraction of cell-months where the Bessac--Naveau conditional-expectation correction agrees with the Cram\'er distance on which version wins---computed separately under each $F_\text{obs}$ constructor (parametric and RVI). The parametric constructor uses $\sigma_\text{rel} = 0.4$; the RVI Gumbel uses the regression coefficients of \citet{vesco2026uncertainty}. Per-type counts do not sum to the pooled total because the historical-statistics join (cells with $\geq 3$ active months) applies per type; 271 cell-months qualify in the pooled analysis but fall below the per-type activity threshold. $^\dagger$Pooled BN concordance uses $M = 2{,}000$ Monte Carlo draws; per-type rows use $M = 200$.}
-    \label{tab:per_type}
-\end{table}
-
-The per-type pattern is informative: the Cram\'er-distance reformulation is most consequential for the violence types where observational uncertainty is greatest, and least consequential where data quality is highest.
