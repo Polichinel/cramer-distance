@@ -15,6 +15,7 @@ paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
 paper/sections/*.aux
+paper/data/*.csv
 
 # Source data (fetched, not committed)
 data/*
