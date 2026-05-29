@@ -12,7 +12,7 @@ I verify this empirically by comparing the Cram\'er-distance reformulation again
 
 The underdispersion bias Bessac and Naveau predict analytically is directly observable in the UCDP data (\S6): classical CRPS selects the tight version in 100\% of cell-months, and the Cram\'er-distance reformulation reverses this in precisely the regime where observational uncertainty exceeds forecast uncertainty (Spearman $\rho = -0.38$, $p < 10^{-15}$, between $\sigma_\text{honest}$ and the classical score gap).
 
-These approaches share the same motivation as the present work but address different aspects: score bias (Bessac--Naveau), error-corrected scoring (Ferro), or diagnostic calibration (Candille--Talagrand), whereas I focus on the effect on model ranking.
+These approaches share the same motivation as the present work but address different aspects: score bias (Bessac--Naveau), error-corrected scoring (Ferro), or diagnostic calibration (Candille--Talagrand), whereas I focus on the effect on forecast-version ranking.
 
 \textbf{Scale-sensitivity and ensemble size.} \citet{bolin2023local} show that CRPS is not locally scale-invariant: it overweights observations in regions where the forecast distribution has large variability. They propose a Scaled CRPS that normalises by local spread---a complementary approach that could in principle be combined with the reformulation proposed here. \citet{ferro2017fair} addresses finite ensemble size bias, a distinct but related source of overconfidence in CRPS rankings. \citet{weijs2011accounting} cast the problem in information-theoretic terms, proposing divergence-based scores with explicit uncertainty decompositions; their framework is complementary but requires different scoring infrastructure.
 
