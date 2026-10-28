@@ -23,12 +23,12 @@ from cramer_distance.propriety import verify_propriety_in_expectation
 # ---------------------------------------------------------------------------
 # SF-1  Constructor coverage gap (soft falsification from P4)
 #
-# The paper presents three F_obs constructors as contributions but only
-# demonstrates ranking reversal with Constructor 2 (parametric). The
-# demonstration section must show the reversal holds with Constructor 1
-# (bounds-based) for realistic UCDP-style bounds, AND must show it
-# disappears for narrow bounds — otherwise the paper claims generality
-# it hasn't earned.
+# The constructors are illustrative scaffolding (not billed as a
+# contribution; see D-05), but the demonstration still must not rest on a
+# single F_obs. §6 must show the reversal holds with Constructor 1
+# (bounds-based) for realistic UCDP-style bounds, AND that it disappears
+# for narrow bounds — otherwise the effect could be an artifact of the
+# one constructor (parametric) used elsewhere.
 # ---------------------------------------------------------------------------
 
 class TestConstructorCoverageGap:
@@ -48,8 +48,8 @@ class TestConstructorCoverageGap:
         # The section should reference Constructor 1 / bounds-based F_obs
         assert "Constructor" in text and "bounds" in text.lower(), (
             "§6 demonstrates only Constructor 2 (parametric). "
-            "Constructor 1 (bounds) is presented as a contribution in §4 "
-            "but never demonstrated. A PNAS reviewer will ask."
+            "Constructor 1 (bounds) is defined in §3 but never demonstrated, "
+            "so the reversal could be an artifact of one F_obs. A reviewer will ask."
         )
 
     def test_bounds_reversal_holds_for_wide_bounds(self) -> None:
