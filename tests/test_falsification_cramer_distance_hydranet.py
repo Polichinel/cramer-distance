@@ -95,7 +95,7 @@ class TestHydraNetReversalRates:
         assert s["n_close"] == 188
         assert s["n_tight"] == 54
         assert s["param_rev"] == 51
-        assert s["rvi_rev"] == 53
+        assert s["rvi_rev"] == 50  # 53 before F-34 (per-type RVI models)
 
     def test_one_sided_reversal(self) -> None:
         df = pd.read_csv(_TYPES["one_sided"])

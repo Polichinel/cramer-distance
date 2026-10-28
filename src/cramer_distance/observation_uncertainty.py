@@ -209,33 +209,70 @@ def sample_from_f_obs_bounds(
 # Constructor 4: Vesco et al. (2026) RVI Gumbel mixture
 # ---------------------------------------------------------------------------
 
-# Vesco et al. (2026) Table A10 regression coefficients.
-# The preferred specification predicts log1p(μ_g) and log(β_g) via OLS
-# and w via logistic regression, using log1p(ỹ) and vague-number dummies
-# as covariates.  No violence-type dummies in the preferred model.
+# Vesco et al. (2026) RVI Gumbel regression coefficients, one model per
+# UCDP violence type, as shipped in the authors' R package uncertainUCDP
+# 0.7.6 (CRAN; `internal_models$sb`, `$ns`, `$os`, `$any` in R/sysdata.rda).
+# Each model predicts log1p(μ_g) and log(β_g) via OLS and w via logistic
+# regression from log1p(ỹ) and vague-number dummies.  Keys: 1 = state-based,
+# 2 = non-state, 3 = one-sided, 4 = all types pooled (the package flags this
+# one as experimental).  The state-based set is the one previously used for
+# all types; F-34 in the writing harness records the correction.
 #
 # Vague-number dummies in the regression (subset of UCDP vague numbers):
 #   D_2, D_3, D_13, D_20, D_24, D_40, D_101, D_200, D_1001, D_2000
-_TABLE_A10_MU = {
-    "intercept": 0.609,
-    "log1p_y": 0.932,
-    2: 0.081, 3: -0.247, 13: -0.441, 20: -0.392,
-    24: -0.480, 40: -0.302, 101: -0.235, 200: -0.212,
-    1001: -0.043, 2000: -0.076,
+_RVI_MU = {
+    1: {  # state-based
+        "intercept": 0.609, "log1p_y": 0.932,
+        2: 0.081, 3: -0.247, 13: -0.441, 20: -0.392, 24: -0.480, 40: -0.302, 101: -0.235, 200: -0.212, 1001: -0.043, 2000: -0.076,
+    },
+    2: {  # non-state
+        "intercept": 0.575, "log1p_y": 0.936,
+        2: -0.035, 3: -0.277, 13: -0.397, 20: -0.368, 24: -0.494, 40: -0.270, 101: -0.234, 200: -0.235, 1001: -0.039, 2000: -0.010,
+    },
+    3: {  # one-sided
+        "intercept": 0.540, "log1p_y": 0.940,
+        2: 0.018, 3: -0.148, 13: -0.373, 20: -0.317, 24: -0.425, 40: -0.271, 101: -0.222, 200: -0.189, 1001: -0.073, 2000: -0.024,
+    },
+    4: {  # all types pooled ('any'; experimental in the package)
+        "intercept": 0.574, "log1p_y": 0.936,
+        2: 0.021, 3: -0.223, 13: -0.403, 20: -0.358, 24: -0.467, 40: -0.280, 101: -0.230, 200: -0.212, 1001: -0.052, 2000: -0.036,
+    },
 }
-_TABLE_A10_BETA = {
-    "intercept": -0.304,
-    "log1p_y": 0.823,
-    2: 0.115, 3: -0.249, 13: -0.491, 20: -1.229,
-    24: -1.678, 40: -1.265, 101: -0.915, 200: -0.734,
-    1001: -0.196, 2000: 0.165,
+_RVI_BETA = {
+    1: {  # state-based
+        "intercept": -0.304, "log1p_y": 0.823,
+        2: 0.115, 3: -0.249, 13: -0.491, 20: -1.229, 24: -1.678, 40: -1.265, 101: -0.915, 200: -0.734, 1001: -0.196, 2000: 0.165,
+    },
+    2: {  # non-state
+        "intercept": -0.702, "log1p_y": 0.855,
+        2: 0.118, 3: -0.065, 13: -0.518, 20: -1.537, 24: -1.722, 40: -1.337, 101: -0.912, 200: -0.866, 1001: -0.683, 2000: 0.331,
+    },
+    3: {  # one-sided
+        "intercept": -0.762, "log1p_y": 0.871,
+        2: 0.030, 3: -0.047, 13: -0.379, 20: -1.531, 24: -1.749, 40: -1.223, 101: -0.874, 200: -0.575, 1001: -0.283, 2000: 0.231,
+    },
+    4: {  # all types pooled ('any'; experimental in the package)
+        "intercept": -0.594, "log1p_y": 0.850,
+        2: 0.088, 3: -0.118, 13: -0.461, 20: -1.434, 24: -1.720, 40: -1.278, 101: -0.900, 200: -0.725, 1001: -0.389, 2000: 0.244,
+    },
 }
-_TABLE_A10_W = {
-    "intercept": -0.086,
-    "log1p_y": -0.053,
-    2: 0.420, 3: -0.259, 13: 0.327, 20: -0.135,
-    24: -0.732, 40: -0.141, 101: -0.072, 200: -0.022,
-    1001: -0.013, 2000: -0.043,
+_RVI_W = {
+    1: {  # state-based
+        "intercept": -0.086, "log1p_y": -0.053,
+        2: 0.420, 3: -0.259, 13: 0.327, 20: -0.135, 24: -0.732, 40: -0.141, 101: -0.072, 200: -0.022, 1001: -0.013, 2000: -0.043,
+    },
+    2: {  # non-state
+        "intercept": -0.341, "log1p_y": -0.030,
+        2: 0.789, 3: 0.342, 13: 0.186, 20: -0.278, 24: -0.666, 40: -0.032, 101: 0.178, 200: 0.023, 1001: 0.118, 2000: -0.087,
+    },
+    3: {  # one-sided
+        "intercept": -0.341, "log1p_y": -0.018,
+        2: 0.520, 3: 0.272, 13: 0.300, 20: -0.320, 24: -0.740, 40: -0.088, 101: -0.028, 200: 0.029, 1001: 0.017, 2000: 0.032,
+    },
+    4: {  # all types pooled ('any'; experimental in the package)
+        "intercept": -0.258, "log1p_y": -0.033,
+        2: 0.577, 3: 0.124, 13: 0.270, 20: -0.243, 24: -0.713, 40: -0.087, 101: 0.028, 200: 0.011, 1001: 0.041, 2000: -0.031,
+    },
 }
 
 
@@ -250,31 +287,36 @@ def _rvi_gumbel_params(
         beta_g: scale of the Gumbel component (> 0)
         w:      mixture weight on the point mass at y_reported, in [0, 1]
 
-    Coefficients are from Vesco et al. (2026, Online Appendix Table A10).
-    The regression predicts log1p(μ_g) and log(β_g) via OLS and w via
-    logistic regression, from log1p(ỹ) and vague-number dummies.  The
-    ``violence_type`` argument is accepted for API compatibility but has
-    no effect: the preferred specification pools all violence types.
+    Coefficients are the per-violence-type models of Vesco et al. (2026)
+    as shipped in uncertainUCDP 0.7.6.  The regression predicts log1p(μ_g)
+    and log(β_g) via OLS and w via logistic regression, from log1p(ỹ) and
+    vague-number dummies.  ``violence_type`` selects the model:
+    1 = state-based, 2 = non-state, 3 = one-sided, 4 = all types pooled.
     """
+    if violence_type not in _RVI_MU:
+        raise ValueError(f"violence_type must be 1, 2, 3 or 4, got {violence_type!r}")
+    coef_mu = _RVI_MU[violence_type]
+    coef_beta = _RVI_BETA[violence_type]
+    coef_w = _RVI_W[violence_type]
     log1p_y = np.log1p(max(y_reported, 0.0))
     y_int = int(y_reported)
 
     # --- Linear predictor for log1p(mu_g) ---
-    eta_mu = _TABLE_A10_MU["intercept"] + _TABLE_A10_MU["log1p_y"] * log1p_y
-    if y_int in _TABLE_A10_MU:
-        eta_mu += _TABLE_A10_MU[y_int]
+    eta_mu = coef_mu["intercept"] + coef_mu["log1p_y"] * log1p_y
+    if y_int in coef_mu:
+        eta_mu += coef_mu[y_int]
     mu_g = np.expm1(eta_mu)  # mu_g = exp(eta_mu) - 1
 
     # --- Linear predictor for log(beta_g) ---
-    eta_beta = _TABLE_A10_BETA["intercept"] + _TABLE_A10_BETA["log1p_y"] * log1p_y
-    if y_int in _TABLE_A10_BETA:
-        eta_beta += _TABLE_A10_BETA[y_int]
+    eta_beta = coef_beta["intercept"] + coef_beta["log1p_y"] * log1p_y
+    if y_int in coef_beta:
+        eta_beta += coef_beta[y_int]
     beta_g = np.exp(eta_beta)
 
     # --- Logistic predictor for w ---
-    eta_w = _TABLE_A10_W["intercept"] + _TABLE_A10_W["log1p_y"] * log1p_y
-    if y_int in _TABLE_A10_W:
-        eta_w += _TABLE_A10_W[y_int]
+    eta_w = coef_w["intercept"] + coef_w["log1p_y"] * log1p_y
+    if y_int in coef_w:
+        eta_w += coef_w[y_int]
     w = 1.0 / (1.0 + np.exp(-eta_w))
 
     return float(max(mu_g, 0.0)), float(max(beta_g, 1e-6)), float(np.clip(w, 0.01, 0.99))
@@ -295,7 +337,8 @@ def f_obs_from_rvi_gumbel(
 
     Args:
         y_reported: UCDP best estimate of fatalities for the event.
-        violence_type: 1 = state-based, 2 = non-state, 3 = one-sided.
+        violence_type: 1 = state-based, 2 = non-state, 3 = one-sided,
+            4 = all types pooled.
 
     Returns:
         Callable F_obs(z) that takes a 1D array and returns CDF values.

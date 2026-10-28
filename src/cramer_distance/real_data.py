@@ -360,8 +360,9 @@ def run_real_data_comparison(
         merged = merged.head(max_cells)
         print(f"  (capped to {max_cells} for testing)")
 
-    # RVI violence_type defaults to 1 (state-based) when pooling all types
-    rvi_tov = violence_type if violence_type is not None else 1
+    # RVI model: per-type when a type is given; the package's pooled 'any'
+    # model (4) when all types are combined in one cell-month
+    rvi_tov = violence_type if violence_type is not None else 4
 
     rows = []
     n = len(merged)
@@ -484,6 +485,11 @@ def summarise(df: pd.DataFrame) -> str:
 
         reversal_rbs = (df["honest_rvi_bs"] < df["tight_rvi_bs"]).mean()
         lines.append(f"  Cell-months with reversal: {reversal_rbs:.1%}")
+
+        cramer_honest_wins_rvi = df["honest_rvi"] < df["tight_rvi"]
+        bs_honest_wins_rvi = df["honest_rvi_bs"] < df["tight_rvi_bs"]
+        concordance_rvi = (cramer_honest_wins_rvi == bs_honest_wins_rvi).mean()
+        lines.append(f"  Ranking concordance with Cramér: {concordance_rvi:.1%}")
 
     return "\n".join(lines)
 
